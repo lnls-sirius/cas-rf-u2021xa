@@ -1,15 +1,16 @@
 #!/usr/bin/python3
+
 import argparse
 import logging
-
+import time 
 import visa
 import struct
-import matplotlib.pyplot as plt
-import numpy as np
+
 time=0.41
+
 def initialize():
         rm=visa.ResourceManager('@py')
-        PS=rm.open_resource('USB0::2391::32536::MY57370012::0::INSTR')
+        PS=rm.open_resource('USB0::2391::32536::MY57380004::0::INSTR')
         PS.timeout=None
         PS.write('*RST')
         PS.write('TRIG:SOUR EXT')
@@ -22,21 +23,30 @@ def initialize():
         return [PS,rm]
 
 def read(PS):
+
         PS.write('INIT')
         print("Read set")
         PS.write('TRAC:DATA? MRES')
-        val=PS.read_raw()
-        print("Read ok")
-        offset=int(chr(val[1]))
-        data=val[2+offset:-1]
-        split = [struct.unpack('>f',(data[4*i:4*i+4])) for i in range (0, int(len(data)/4))]
-        power=np.array(split)
-        return power
+        data = PS.read_raw()
 
+        char_data = [] 
+
+        if chr(data[0]) == '#':
+            x = int(chr(data[1]))
+            y = int(data[2:2+x])
+
+            d_bytes = data[2+x:-1]
+             
+            print(data[0], x, y, type(y), len(d_bytes))
+            res = [struct.unpack('>f', d_bytes[4*i:4*i+4])[0] for i in range(int(y/4))]
+            print(res)
+        else:
+            print('Wrong format')
+        
 [PS,rm]=initialize()
 
 while (1):
-    print(read(PS))
+    read(PS)
 
 if __name__ == '__main__':
     pass
