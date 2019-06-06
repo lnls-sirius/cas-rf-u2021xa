@@ -15,14 +15,18 @@ DBD += powerMeter.dbd
 
 # powerMeter.dbd will be made up from these files:
 powerMeter_DBD += base.dbd
+powerMeter_DBD += calcSupport.dbd
+powerMeter_DBD += asyn.dbd
 powerMeter_DBD += stream.dbd
-powerMeter_DBD += drvAsynSerialPort.dbd 
+powerMeter_DBD += drvAsynIPPort.dbd
 
 # Include dbd files from all support applications:
 #powerMeter_DBD += xxx.dbd
 
 # Add all the support libraries needed by this IOC
-powerMeter_LIBS += stream asyn
+powerMeter_LIBS += stream
+powerMeter_LIBS += asyn
+powerMeter_LIBS += calc
 
 # powerMeter_registerRecordDeviceDriver.cpp derives from powerMeter.dbd
 powerMeter_SRCS += powerMeter_registerRecordDeviceDriver.cpp

@@ -9,6 +9,3 @@ clean distclean:
 	find . -name '*.pyo' -exec rm --force {} +
 	find . -name '*~'    -exec rm --force {} +
 	find . -name '__pycache__'  -exec rm -rd --force {} +
-
-install:
-	i

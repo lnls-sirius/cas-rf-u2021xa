@@ -1,3 +1,5 @@
+Terminator = CR LF;
+
 getIDN {
     out "*IDN?";
     in "%\$1[^\r\n]";
@@ -16,3 +18,11 @@ getD {
     in "%d";
     ExtraInput = Ignore;
 }
+
+query{ out "Query:%s", in "%s" }
+
+getWf{ InTerminator=CR LF; ReplyTimeout=10000; ReadTimeout=100; Separator=", "; out "Wf"; in "[%e]" }
+
+getWfStr{ Separator=", "; out "Res"; in "[%s]" }
+
+debug{ out "%s"; in "%s" }
