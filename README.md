@@ -2,7 +2,6 @@
 
 ## Description
 
-An unix socket is serve the IOC all necessary information and receive it's commands.
 PyVisa is used to communicate with the instrument.
 StreamDevice based IOC.
 
