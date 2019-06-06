@@ -26,7 +26,4 @@ PyVISA==1.9.1
 PyVISA-py==0.3.1
 ```
 
-Author: Cláudio Ferreira Carneiro
-
-### Credits: 
-[Victor Carneiro Lima](https://github.com/vclima/power_sensor.git)
+[Reference Visa Script](https://github.com/vclima/power_sensor.git)
