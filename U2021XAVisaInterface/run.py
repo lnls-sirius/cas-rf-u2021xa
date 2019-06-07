@@ -5,7 +5,7 @@ import logging
 from server import Comm
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO, format='%(asctime)-15s [%(levelname)s] %(message)s',
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)-15s [%(levelname)s] %(message)s',
         datefmt='%d/%m/%Y %H:%M:%S')
     logger = logging.getLogger()
 
