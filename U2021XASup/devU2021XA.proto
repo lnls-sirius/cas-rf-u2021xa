@@ -1,4 +1,5 @@
 InTerminator = CR LF;
+ExtraInput=Ignore;
 
 getTracTime{    out "getTracTime"; in "%f"; }
 
@@ -6,14 +7,14 @@ getTracData{
     ReplyTimeout=5000; ReadTimeout=100; Separator=", ";
                 out "getTracData"; in "[%e]" }
 
-getInstrInfo{   out "getInstrInfo"; in "%s"; }
+getInstrInfo{ ExtraInput=Ignore;  out "getInstrInfo"; in "%s"; }
 
-getResources{   out "getResources"; in "%s"; }
+getResources{ ExtraInput=Ignore;  out "getResources"; in "%s"; }
 
 setTracTime{ out "setTracTime %f"; in "%f"; }
 
-query{ out "query \$1"; in "%s"; }
-write{ out "write \$1"; in "%s"; }
+query{ ExtraInput=Ignore; out "query \$1"; in "%s"; }
+write{ ExtraInput=Ignore; out "write \$1"; in "%s"; }
 
 instrConnect{    out "instrConnect";    in "%s"; }
 instrDisconnect{ out "instrDisconnect"; in "%s"; }
