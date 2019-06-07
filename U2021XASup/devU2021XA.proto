@@ -1,28 +1,22 @@
-Terminator = CR LF;
+InTerminator = CR LF;
 
-getIDN {
-    out "*IDN?";
-    in "%\$1[^\r\n]";
-    ExtraInput = Ignore;
-}
+getTracTime{    out "getTracTime"; in "%f"; }
 
-cmd {
-    out "\$1";
-}
+getTracData{
+    ReplyTimeout=5000; ReadTimeout=100; Separator=", ";
+                out "getTracData"; in "[%e]" }
 
-setD {
-    out "\$1 %d";
-}
-getD {
-    out "\$1?";
-    in "%d";
-    ExtraInput = Ignore;
-}
+getInstrInfo{   out "getInstrInfo"; in "%s"; }
 
-query{ out "Query:%s", in "%s" }
+getResources{   out "getResources"; in "%s"; }
 
-getWf{ InTerminator=CR LF; ReplyTimeout=10000; ReadTimeout=100; Separator=", "; out "Wf"; in "[%e]" }
+setTracTime{ out "setTracTime %f"; in "%f"; }
 
-getWfStr{ Separator=", "; out "Res"; in "[%s]" }
+query{ out "query \$1"; in "%s"; }
+write{ out "write \$1"; in "%s"; }
 
-debug{ out "%s"; in "%s" }
+instrConnect{    out "instrConnect";    in "%s"; }
+instrDisconnect{ out "instrDisconnect"; in "%s"; }
+instrInit{       out "instrInit";       in "%s"; }
+
+debug{ out "%s"; in "%s"; }
