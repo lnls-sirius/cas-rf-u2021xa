@@ -17,14 +17,11 @@ powerMeter_registerRecordDeviceDriver pdbbase
 drvAsynIPPortConfigure("L0", "unix://${TOP}/U2021XAVisaInterface/unix-socket")
 
 ## Load record instances
-dbLoadRecords("db/devU2021XA.db","P=,R=,PORT=L0,A=0")
+dbLoadRecords("db/devU2021XA.db","P=Test,R=:,PORT=L0,A=0")
 
 cd "${TOP}/iocBoot/${IOC}"
 iocInit
 
-## Start any sequence programs
-#seq sncxxx,"user=root"
-
-#enable debug output
-# var streamDebug 1
+# enable debug output
+#var streamDebug 1
 
