@@ -2,7 +2,6 @@
 
 ## Description
 
-An unix socket is serve the IOC all necessary information and receive it's commands.
 PyVisa is used to communicate with the instrument.
 StreamDevice based IOC.
 
@@ -27,7 +26,4 @@ PyVISA==1.9.1
 PyVISA-py==0.3.1
 ```
 
-Author: Cláudio Ferreira Carneiro
-
-### Credits: 
-[Victor Carneiro Lima](https://github.com/vclima/power_sensor.git)
+[Reference Visa Script](https://github.com/vclima/power_sensor.git)
