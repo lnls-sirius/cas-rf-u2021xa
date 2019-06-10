@@ -25,6 +25,7 @@ class VisaManager():
         self.instr_timeout = 5000
 
         self.trac_time = trac_time
+        self.trac_time_new = trac_time
 
     def list_resources(self):
         return str(list(self.rm.list_resources()))
@@ -58,7 +59,7 @@ class VisaManager():
 
         return self.instr
 
-    def instr_init(self):
+    def instr_config(self):
         if not self.instr:
             return ResponseType.INSTR_DISCONNECTED
 
@@ -68,7 +69,8 @@ class VisaManager():
             self.instr.write('INIT:CONT OFF')
             self.instr.write('TRAC:STAT ON')
             self.instr.write('AVER:STAT OFF')
-            self.instr.write('SENS:TRAC:TIME {}'.format(self.trac_time))
+            self.instr.write('SENS:TRAC:TIME {}'.format(self.trac_time_new))
+            self.trac_time = self.trac_time_new
             return ResponseType.OK
         except:
             logger.exception('Instr Init')
@@ -184,8 +186,8 @@ class Comm():
                     try:
                         match = re.search(r'setTracTime (\d+?\.?\d*)', command)
                         if hasattr(match, 'group'):
-                            self.manager.trac_time = float(match.group(1))
-                            response = self.manager.trac_time
+                            self.manager.trac_time_new = float(match.group(1))
+                            response = self.manager.trac_time_new
                         else:
                             response = ResponseType.WRONG_FORMAT_INPUT
 
@@ -236,8 +238,8 @@ class Comm():
                         response = self.manager.instr_connect()
                     elif command == 'instrDisconnect':
                         response = self.manager.instr_disconnect()
-                    elif command == 'instrInit':
-                        response = self.manager.instr_init()
+                    elif command == 'instrConfig':
+                        response = self.manager.instr_config()
 
                 connection.sendall('{}\r\n'.format(response).encode('utf-8'))
                 logger.debug('Command {} Length {}'.format(command, response))
