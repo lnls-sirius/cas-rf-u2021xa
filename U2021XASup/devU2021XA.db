@@ -1,11 +1,22 @@
 record(waveform, "$(P)$(R)TracData-Mon"){
-    field(DESC, "Power measures")
+    field(DESC, "Trace data")
     field(EGU, "dBm")
     field(SCAN, "5 second")
     field(DTYP, "stream")
     field(INP,  "@devU2021XA.proto getTracData $(PORT) $(A)")
     field(FTVL, "FLOAT")
     field(NELM, "26000")
+}
+
+record(acalcout, "$(P)$(R)TracDataScale"){
+    field(EGU, "s")
+	field(DESC, "x scale in seconds")
+	field(CALC, "(B#0)?(IX*A/B):0")
+
+    field(INPA, "$(P)$(R)TracTime-RB CP")
+    field(INPB, "$(P)$(R)TracData-Mon.NORD CP")
+
+	field(NELM, "26000")
 }
 
 record(bi, "$(P)$(R)VisaResource-RB:Timer"){
@@ -51,7 +62,8 @@ record(bi, "$(P)$(R)TracTime-RB:Timer"){
 }
 
 record(ai, "$(P)$(R)TracTime-RB"){
-    field(DESC, "TRAC:TIME used to acquire data")
+    field(EGU,  "s")
+    field(DESC, "Duration of the trace")
     field(DTYP, "stream")
     field(PREC, "2")
     field(INP,  "@devU2021XA.proto getTracTime $(PORT) $(A)")
@@ -66,11 +78,11 @@ record(ao, "$(P)$(R)TracTime-SP"){
     field(FLNK, "$(P)$(R)TracTime-RB")
 }
 
-record(waveform, "$(P)$(R)IDN-Mon"){
+record(stringin, "$(P)$(R)IDN-Mon"){
     field(SCAN, "10 second")
     field(DESC, "SCPI identification string")
-    field(NELM, "200")
-    field(FTVL, "UCHAR")
+#    field(NELM, "200")
+#    field(FTVL, "UCHAR")
     field(DTYP, "stream")
     field(INP,  "@devU2021XA.proto query(199,*IDN?) $(PORT) $(A)")
 }
@@ -80,7 +92,21 @@ record(stringout, "$(P)$(R)InstrDisconnect-Cmd"){
     field(OUT,  "@devU2021XA.proto instrDisconnect $(PORT) $(A)")
 }
 
-record(seq, "$(P)$(R):InitializeComm"){
+record(bi, "$(P)$(R)AutoReconnect-Enbl"){
+    field(DESC, "Enable auto reconnect")
+    field(VAL, "1")
+    field(PINI, "YES")
+}
+
+record(scalcout, "$(P)$(R)AutoReconnectTrigg"){
+    field(CALC, "((AA='INSTR_DISCONNECTED')&A)")
+    field(INAA, "$(P)$(R)IDN-Mon CP")
+    field(INPA, "$(P)$(R)AutoReconnect-Enbl CP")
+}
+
+record(seq, "$(P)$(R):ConfigComm"){
+    field(DESC, "Configure device")
+    field(SCAN, "10 second")
     field(PINI, "YES")
 
     field(DLY1, "1")
@@ -93,7 +119,10 @@ record(seq, "$(P)$(R):InitializeComm"){
 
     field(DLY3, "1")
     field(DOL3, "1")
-    field(LNK3, "$(P)$(R)InstrInit-Cmd.PROC")
+    field(LNK3, "$(P)$(R)InstrConfig-Cmd.PROC")
+
+    field(DISV, "0")
+    field(SDIS, "$(P)$(R)AutoReconnectTrigg CP")
 
 }
 record(stringout, "$(P)$(R)InstrConnect-Cmd"){
@@ -101,9 +130,9 @@ record(stringout, "$(P)$(R)InstrConnect-Cmd"){
     field(OUT,  "@devU2021XA.proto instrConnect(199) $(PORT) $(A)")
 }
 
-record(stringout, "$(P)$(R)InstrInit-Cmd"){
+record(stringout, "$(P)$(R)InstrConfig-Cmd"){
     field(DTYP, "stream")
-    field(OUT,  "@devU2021XA.proto instrInit $(PORT) $(A)")
+    field(OUT,  "@devU2021XA.proto instrConfig $(PORT) $(A)")
 }
 
 #record(bo, "$(P)$(R)RST"){

@@ -24,7 +24,7 @@ query{ ExtraInput=Ignore; out "query \$2"; in "%\$1[^\r\n]"; }
 write{ ExtraInput=Ignore; out "write \$2"; in "%\$1[^\r\n]"; }
 
 instrConnect{    out "instrConnect";       in "%\$1[^\r\n]"; }
-instrDisconnect{ out "instrDisconnect"; in "%s"; }
-instrInit{       out "instrInit";       in "%s"; }
+instrDisconnect{ out "instrDisconnect";    in "%s"; }
+instrConfig{     out "instrInit";          in "%s"; }
 
 debug{ out "%s"; in "%\$1[^\r\n]"; }
