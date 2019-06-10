@@ -1,3 +1,2 @@
 #!/bin/bash
-/usr/bin/python3 run.py --resource 'USB0::2391::32536::MY57380004::0::INSTR'
-
+/usr/bin/python3 run.py --resource 'USB0::2391::32536::MY57380004::0::INSTR' --debug

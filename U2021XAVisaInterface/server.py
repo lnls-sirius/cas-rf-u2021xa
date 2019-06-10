@@ -8,12 +8,13 @@ import usb
 
 logger = logging.getLogger()
 
-NO_RESPONSE = 'NO_RESPONSE'
-WRONG_FORMAT = 'WRONG_FORMAT'
-EXCEPTION = 'EXCEPTION'
-OK = 'OK'
-INSTR_DISCONNECTED = 'INSTR_DISCONNECTED'
-USB_ERROR = 'USB_ERROR'
+class ResponseType():
+    NO_RESPONSE = 'NO_RESPONSE'
+    WRONG_FORMAT_INPUT = 'WRONG_FORMAT_INPUT'
+    EXCEPTION = 'EXCEPTION'
+    OK = 'OK'
+    INSTR_DISCONNECTED = 'INSTR_DISCONNECTED'
+    USB_ERROR = 'USB_ERROR'
 
 class VisaManager():
 
@@ -32,14 +33,12 @@ class VisaManager():
         try:
             self.instr = self.rm.open_resource(self.resource_str)
             self.instr.timeout = self.instr_timeout
+
             return str(self.instr)
 
-        except usb.core.USBError:
-            logger.exception('instr_connect usb error')
-            return USB_ERROR
-        except:
+        except Exception as e:
             logger.exception('instr_connect error')
-            return EXCEPTION
+            return ResponseType.EXCEPTION + ' {}'.format(e)
 
 
     def instr_disconnect(self):
@@ -48,20 +47,20 @@ class VisaManager():
                 self.instr.close()
                 self.instr = None
 
-            return INSTR_DISCONNECTED
+            return ResponseType.INSTR_DISCONNECTED
         except:
             logger.exception('instr_disconnect error')
-            return EXCEPTION
+            return ResponseType.EXCEPTION
 
     def instr_info(self):
         if not self.instr:
-            return INSTR_DISCONNECTED
+            return ResponseType.INSTR_DISCONNECTED
 
         return self.instr
 
     def instr_init(self):
         if not self.instr:
-            return INSTR_DISCONNECTED
+            return ResponseType.INSTR_DISCONNECTED
 
         try:
             self.instr.write('*RST')
@@ -70,33 +69,33 @@ class VisaManager():
             self.instr.write('TRAC:STAT ON')
             self.instr.write('AVER:STAT OFF')
             self.instr.write('SENS:TRAC:TIME {}'.format(self.trac_time))
-            return OK
+            return ResponseType.OK
         except:
             logger.exception('Instr Init')
-            return EXCEPTION
+            return ResponseType.EXCEPTION
 
     def instr_query(self, param):
         if not self.instr:
-            return INSTR_DISCONNECTED
+            return ResponseType.INSTR_DISCONNECTED
         try:
             return str(self.instr.query(param))
         except:
             logger.exception('Instr query')
-            return EXCEPTION
+            return ResponseType.EXCEPTION
 
     def instr_write(self, param):
         if not self.instr:
-            return INSTR_DISCONNECTED
+            return ResponseType.INSTR_DISCONNECTED
         try:
             return str(self.instr.write(param))
         except:
             logger.exception('Instr write')
-            return EXCEPTION
+            return ResponseType.EXCEPTION
 
 
     def instr_trac_data(self):
         if not self.instr:
-            return INSTR_DISCONNECTED
+            return ResponseType.INSTR_DISCONNECTED
 
         try:
             self.instr.write('INIT')
@@ -111,12 +110,12 @@ class VisaManager():
                  
                 res = [struct.unpack('>f', d_bytes[4*i:4*i+4])[0] for i in range(int(y/4))]
             else:
-                res = EXCEPTION
+                res = ResponseType.EXCEPTION
                 logger.error('Wrong format response') 
             return str(res)
         except:
             logger.exception('Instr trac data')
-            return EXCEPTION
+            return ResponseType.ResponseType.EXCEPTION
 
         
 class Comm():
@@ -162,7 +161,7 @@ class Comm():
         try:
             while True:
                 command = connection.recv(1024).decode('utf-8')
-                response = NO_RESPONSE
+                response = ResponseType.NO_RESPONSE
 
                 if not command:
                     break
@@ -175,6 +174,8 @@ class Comm():
                         response = self.manager.instr_trac_data()
                     elif command == 'getInstrInfo':
                         response = self.manager.instr_info()
+                    elif command == 'getResource':
+                        response =  self.manager.resource_str
                     elif command == 'getResources':
                         response =  self.manager.list_resources()
 
@@ -186,10 +187,24 @@ class Comm():
                             self.manager.trac_time = float(match.group(1))
                             response = self.manager.trac_time
                         else:
-                            response = EXCEPTION
+                            response = ResponseType.WRONG_FORMAT_INPUT
 
                     except IndexError:
-                        response = 'Wrong command format'
+                        logger.exception('Command setTracTime')
+                        response = ResponseType.WRONG_FORMAT_INPUT
+
+                elif command.startswith('setResource'):
+                    try:
+                        match = re.search(r'setResource (.*)', command)
+                        if hasattr(match, 'group'):
+                            self.manager.resource_str = match.group(1)
+                            response = self.manager.resource_str
+                        else:
+                            response = ResponseType.WRONG_FORMAT_INPUT
+
+                    except IndexError:
+                        logger.exception('Command setResource')
+                        response = ResponseType.WRONG_FORMAT_INPUT
 
                 # Query
                 elif command.startswith('query'):
@@ -198,9 +213,10 @@ class Comm():
                         if hasattr(match, 'group'):
                             response = self.manager.instr_query(match.group(1))
                         else:
-                            response = WRONG_FORMAT
+                            response = ResponseType.WRONG_FORMAT_INPUT
                     except IndexError:
-                        response = EXCEPTION
+                        logger.exception('Command query')
+                        response = ResponseType.WRONG_FORMAT_INPUT
 
                 # Write
                 elif command.startswith('write'):
@@ -209,9 +225,10 @@ class Comm():
                         if hasattr(match, 'group'):
                             response = self.manager.instr_write(match.group(1))
                         else:
-                            response = WRONG_FORMAT
+                            response = ResponseType.WRONG_FORMAT_INPUT
                     except IndexError:
-                        response = EXCEPTION
+                        logger.exception('Command write')
+                        response = ResponseType.WRONG_FORMAT_INPUT
 
                 # Others
                 else:
