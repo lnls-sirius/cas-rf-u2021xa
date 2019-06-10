@@ -1,9 +1,6 @@
-record(stringout, "$(P)$(R)DEBUG"){
-    field(DTYP, "stream")
-    field(OUT,  "@devU2021XA.proto debug $(PORT) $(A)")
-}
-
 record(waveform, "$(P)$(R)TracData-Mon"){
+    field(DESC, "Power measures")
+    field(EGU, "dBm")
     field(SCAN, "5 second")
     field(DTYP, "stream")
     field(INP,  "@devU2021XA.proto getTracData $(PORT) $(A)")
@@ -11,39 +8,71 @@ record(waveform, "$(P)$(R)TracData-Mon"){
     field(NELM, "26000")
 }
 
-record(stringin, "$(P)$(R)Resources-Mon"){
+record(bi, "$(P)$(R)VisaResource-RB:Timer"){
     field(SCAN, "10 second")
-    field(DESC, "Available Visa resources")
+    field(FLNK, "$(P)$(R)VisaResource-RB")
+}
+record(waveform, "$(P)$(R)VisaResource-RB"){
+    field(DESC, "Visa resource to be connected at")
+    field(NELM, "200")
+    field(FTVL, "UCHAR")
     field(DTYP, "stream")
-    field(INP,  "@devU2021XA.proto getResources $(PORT) $(A)")
+    field(INP,  "@devU2021XA.proto getResource(199) $(PORT) $(A)")
+}
+record(stringout, "$(P)$(R)VisaResource-SP"){
+    field(DESC, "Visa resource to be connected at")
+    field(DTYP, "stream")
+    field(OUT,  "@devU2021XA.proto setResource $(PORT) $(A)")
+
+    field(FLNK, "$(P)$(R)VisaResource-RB")
 }
 
-record(stringin, "$(P)$(R)InstrInfo-Mon"){
+record(waveform, "$(P)$(R)VisaResources-Mon"){
     field(SCAN, "10 second")
+    field(DESC, "Visa res connected to the host machine")
+    field(NELM, "200")
+    field(FTVL, "UCHAR")
     field(DTYP, "stream")
-    field(INP,  "@devU2021XA.proto getInstrInfo $(PORT) $(A)")
+    field(INP,  "@devU2021XA.proto getResources(199) $(PORT) $(A)")
 }
 
-record(ai, "$(P)$(R)TracTime:RB"){
+record(waveform, "$(P)$(R)InstrInfo-Mon"){
+    field(DESC, "General info about the instrument")
     field(SCAN, "10 second")
-    field(DESC, "TRAC:TIME for the trac data record")
     field(DTYP, "stream")
+    field(NELM, "200")
+    field(FTVL, "UCHAR")
+    field(INP,  "@devU2021XA.proto getInstrInfo(199) $(PORT) $(A)")
+}
+
+record(bi, "$(P)$(R)TracTime-RB:Timer"){
+    field(SCAN, "10 second")
+    field(FLNK, "$(P)$(R)TracTime-RB")
+}
+
+record(ai, "$(P)$(R)TracTime-RB"){
+    field(DESC, "TRAC:TIME used to acquire data")
+    field(DTYP, "stream")
+    field(PREC, "2")
     field(INP,  "@devU2021XA.proto getTracTime $(PORT) $(A)")
 }
 
-record(ao, "$(P)$(R)TracTime:SP"){
-    field(DESC, "TRAC:TIME for the trac data record")
+record(ao, "$(P)$(R)TracTime-SP"){
+    field(DESC, "TRAC:TIME used to acquire data")
     field(DTYP, "stream")
+    field(PREC, "2")
     field(OUT,  "@devU2021XA.proto setTracTime $(PORT) $(A)")
 
-    field(FLNK, "$(P)$(R)TracTime:RB")
+    field(FLNK, "$(P)$(R)TracTime-RB")
 }
 
-record(stringin, "$(P)$(R)IDN-Mon"){
+record(waveform, "$(P)$(R)IDN-Mon"){
     field(SCAN, "10 second")
     field(DESC, "SCPI identification string")
+    field(NELM, "200")
+    field(FTVL, "UCHAR")
     field(DTYP, "stream")
-    field(INP,  "@devU2021XA.proto query(*IDN?) $(PORT) $(A)")
+    field(INP,  "@devU2021XA.proto query(199,*IDN?) $(PORT) $(A)")
 }
 
 record(stringout, "$(P)$(R)InstrDisconnect-Cmd"){
@@ -51,9 +80,25 @@ record(stringout, "$(P)$(R)InstrDisconnect-Cmd"){
     field(OUT,  "@devU2021XA.proto instrDisconnect $(PORT) $(A)")
 }
 
+record(seq, "$(P)$(R):InitializeComm"){
+    field(PINI, "YES")
+
+    field(DLY1, "1")
+    field(DOL1, "1")
+    field(LNK1, "$(P)$(R)InstrDisconnect-Cmd.PROC")
+
+    field(DLY2, "1")
+    field(DOL2, "1")
+    field(LNK2, "$(P)$(R)InstrConnect-Cmd.PROC")
+
+    field(DLY3, "1")
+    field(DOL3, "1")
+    field(LNK3, "$(P)$(R)InstrInit-Cmd.PROC")
+
+}
 record(stringout, "$(P)$(R)InstrConnect-Cmd"){
     field(DTYP, "stream")
-    field(OUT,  "@devU2021XA.proto instrConnect $(PORT) $(A)")
+    field(OUT,  "@devU2021XA.proto instrConnect(199) $(PORT) $(A)")
 }
 
 record(stringout, "$(P)$(R)InstrInit-Cmd"){

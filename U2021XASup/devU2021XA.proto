@@ -1,23 +1,30 @@
-InTerminator = CR LF;
+InTerminator=CR LF;
 ExtraInput=Ignore;
 
 getTracTime{    out "getTracTime"; in "%f"; }
 
-getTracData{
+getTracData {
     ReplyTimeout=5000; ReadTimeout=100; Separator=", ";
-                out "getTracData"; in "[%e]" }
+                out "getTracData"; in "[%e]"; }
 
-getInstrInfo{ ExtraInput=Ignore;  out "getInstrInfo"; in "%s"; }
+getInstrInfo{ ExtraInput=Ignore;
+                out "getInstrInfo"; in "%\$1[^\r\n]"; }
 
-getResources{ ExtraInput=Ignore;  out "getResources"; in "%s"; }
+getResources{ ExtraInput=Ignore; Separator="";
+                out "getResources"; in "%\$1[^\r\n]"; }
+
+getResource{ ExtraInput=Ignore; Separator="";
+                out "getResource"; in "%\$1[^\r\n]"; }
+
+setResource{ out "setResource %s"; in "%s"; }
 
 setTracTime{ out "setTracTime %f"; in "%f"; }
 
-query{ ExtraInput=Ignore; out "query \$1"; in "%s"; }
-write{ ExtraInput=Ignore; out "write \$1"; in "%s"; }
+query{ ExtraInput=Ignore; out "query \$2"; in "%\$1[^\r\n]"; }
+write{ ExtraInput=Ignore; out "write \$2"; in "%\$1[^\r\n]"; }
 
-instrConnect{    out "instrConnect";    in "%s"; }
+instrConnect{    out "instrConnect";       in "%\$1[^\r\n]"; }
 instrDisconnect{ out "instrDisconnect"; in "%s"; }
 instrInit{       out "instrInit";       in "%s"; }
 
-debug{ out "%s"; in "%s"; }
+debug{ out "%s"; in "%\$1[^\r\n]"; }
