@@ -1,0 +1,20 @@
+[Unit]
+Description=Sirius RF U2021XA Power Meter - IOC
+Wants=network-online.target
+After=network-online.target
+
+After=cas-rf-u2021xa-visa.service
+
+[Service]
+Restart=always
+RestartSec=10
+Type=simple
+
+WorkingDirectory=/root/cas-rf-u2021xa/iocBoot/iocpowerMeter
+ExecStart=/usr/bin/procServ -d --chdir /root/cas-rf-u2021xa/iocBoot/iocpowerMeter 20206 ./st.cmd
+
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

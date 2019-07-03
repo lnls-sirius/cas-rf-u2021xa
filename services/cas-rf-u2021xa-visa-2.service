@@ -1,0 +1,20 @@
+[Unit]
+Description=Sirius RF U2021XA Power Meter 2 - Visa Interface
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Restart=always
+RestartSec=10
+Type=simple
+
+WorkingDirectory=/root/cas-rf-u2021xa/U2021XAVisaInterface
+ExecStart=/bin/python3 /root/cas-rf-u2021xa/U2021XAVisaInterface/run.py\
+     --resource 'USB0::2391::32536::MY57380004::0::INSTR'\
+     --unix-socket-path 'socket-2'
+
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

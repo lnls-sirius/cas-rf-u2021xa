@@ -14,14 +14,14 @@ epicsEnvSet("EPICS_CA_MAX_ARRAY_BYTES", "1073676294")
 dbLoadDatabase "dbd/powerMeter.dbd"
 powerMeter_registerRecordDeviceDriver pdbbase
 
-drvAsynIPPortConfigure("L0", "unix://${TOP}/U2021XAVisaInterface/unix-socket")
+drvAsynIPPortConfigure("L0", "unix://${TOP}/U2021XAVisaInterface/socket-1")
+drvAsynIPPortConfigure("L1", "unix://${TOP}/U2021XAVisaInterface/socket-2")
 
 ## Load record instances
-dbLoadRecords("db/devU2021XA.db","P=Test,R=:,PORT=L0,A=0")
+dbLoadRecords("db/devU2021XA.db","P=RA-RF:PowerSensor1,R=:,PORT=L0,A=0")
+dbLoadRecords("db/devU2021XA.db","P=RA-RF:PowerSensor2,R=:,PORT=L1,A=0")
 
 cd "${TOP}/iocBoot/${IOC}"
 iocInit
 
-# enable debug output
 #var streamDebug 1
-
