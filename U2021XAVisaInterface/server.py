@@ -14,6 +14,7 @@ class ResponseType():
     EXCEPTION = 'EXCEPTION'
     OK = 'OK'
     INSTR_DISCONNECTED = 'INSTR_DISCONNECTED'
+    INSTR_NOT_CONFIGURED = 'INST_NOT_CONFIGURED'
     USB_ERROR = 'USB_ERROR'
 
 class VisaManager():
@@ -23,15 +24,18 @@ class VisaManager():
         self.resource_str = resource
         self.instr = None
         self.instr_timeout = 5000
+        self.instr_configured = False
 
         self.trac_time = trac_time
         self.trac_time_new = trac_time
+        self.time_axis = []
 
     def list_resources(self):
         return str(list(self.rm.list_resources()))
 
     def instr_connect(self):
         try:
+            logger.info(self.resource_str)
             self.instr = self.rm.open_resource(self.resource_str)
             self.instr.timeout = self.instr_timeout
 
@@ -45,11 +49,15 @@ class VisaManager():
     def instr_disconnect(self):
         try:
             if self.instr:
+                self.instr.clear()
                 self.instr.close()
                 self.instr = None
 
             return ResponseType.INSTR_DISCONNECTED
         except:
+            self.instr = None
+            self.instr_configured = False
+
             logger.exception('instr_disconnect error')
             return ResponseType.EXCEPTION
 
@@ -71,14 +79,21 @@ class VisaManager():
             self.instr.write('AVER:STAT OFF')
             self.instr.write('SENS:TRAC:TIME {}'.format(self.trac_time_new))
             self.trac_time = self.trac_time_new
+            self.instr_configured = True
+
             return ResponseType.OK
         except:
-            logger.exception('Instr Init')
+            logger.exception('Instr Config')
+            self.instr_configured = False
             return ResponseType.EXCEPTION
 
     def instr_query(self, param):
         if not self.instr:
             return ResponseType.INSTR_DISCONNECTED
+
+        if not self.instr_configured:
+            return ResponseType.INSTR_NOT_CONFIGURED
+
         try:
             return str(self.instr.query(param))
         except:
@@ -88,6 +103,10 @@ class VisaManager():
     def instr_write(self, param):
         if not self.instr:
             return ResponseType.INSTR_DISCONNECTED
+
+        if not self.instr_configured:
+            return ResponseType.INSTR_NOT_CONFIGURED
+
         try:
             return str(self.instr.write(param))
         except:
@@ -99,27 +118,32 @@ class VisaManager():
         if not self.instr:
             return ResponseType.INSTR_DISCONNECTED
 
+        if not self.instr_configured:
+            return ResponseType.INSTR_NOT_CONFIGURED
+
         try:
             self.instr.write('INIT')
             self.instr.write('TRAC:DATA? MRES')
             data = self.instr.read_raw()
-            char_data = [] 
+            char_data = []
             if chr(data[0]) == '#':
                 x = int(chr(data[1]))
                 y = int(data[2:2+x])
 
                 d_bytes = data[2+x:-1]
-                 
+
                 res = [struct.unpack('>f', d_bytes[4*i:4*i+4])[0] for i in range(int(y/4))]
+                if len(res) != len(self.time_axis):
+                    self.time_axis = [self.trac_time * i for i in range(len(res))]
             else:
                 res = ResponseType.EXCEPTION
-                logger.error('Wrong format response') 
+                logger.error('Wrong format response')
             return str(res)
         except:
             logger.exception('Instr trac data')
-            return ResponseType.ResponseType.EXCEPTION
+            return ResponseType.EXCEPTION
 
-        
+
 class Comm():
     def __init__(self, unix_socket_path, resource, *args, **kwargs):
         self.unix_socket_path = unix_socket_path
@@ -133,7 +157,7 @@ class Comm():
             if os.path.exists(self.unix_socket_path):
                 logger.warning('Unix socket {} already exist'.format(self.unix_socket_path))
                 os.unlink(self.unix_socket_path)
-            
+
             if self.welcome_socket != None:
                 logger.warning('Welcome socket already istantiated')
 
@@ -147,7 +171,7 @@ class Comm():
                 logger.info('Unix welcome socket listening')
                 connection, client_address = self.welcome_socket.accept()
                 logger.info('Client {} connected'.format(client_address))
-                
+
                 connection.settimeout(30)
 
                 self.handle_connection(connection)
@@ -155,7 +179,7 @@ class Comm():
             logger.exception('Comm exception')
         finally:
             self.welcome_socket.close()
-            os.remove(self.unix_socket_path) 
+            os.remove(self.unix_socket_path)
             logger.info('Comm server shutdown')
             self.welcome_socket = None
 
@@ -180,6 +204,8 @@ class Comm():
                         response =  self.manager.resource_str
                     elif command == 'getResources':
                         response =  self.manager.list_resources()
+                    elif command == 'getTimeAxis':
+                        response =  str(self.manager.time_axis)
 
                 # Set
                 elif command.startswith('setTracTime'):
@@ -188,6 +214,7 @@ class Comm():
                         if hasattr(match, 'group'):
                             self.manager.trac_time_new = float(match.group(1))
                             response = self.manager.trac_time_new
+                            response = self.manager.instr_config()
                         else:
                             response = ResponseType.WRONG_FORMAT_INPUT
 

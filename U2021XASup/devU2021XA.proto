@@ -3,6 +3,9 @@ ExtraInput=Ignore;
 
 getTracTime{    out "getTracTime"; in "%f"; }
 
+getTimeAxis {
+    ReplyTimeout=5000; ReadTimeout=100; Separator=", ";
+                out "getTimeAxis"; in "[%e]"; }
 getTracData {
     ReplyTimeout=5000; ReadTimeout=100; Separator=", ";
                 out "getTracData"; in "[%e]"; }
@@ -25,6 +28,6 @@ write{ ExtraInput=Ignore; out "write \$2"; in "%\$1[^\r\n]"; }
 
 instrConnect{    out "instrConnect";       in "%\$1[^\r\n]"; }
 instrDisconnect{ out "instrDisconnect";    in "%s"; }
-instrConfig{     out "instrInit";          in "%s"; }
+instrConfig{     out "instrConfig";          in "%s"; }
 
 debug{ out "%s"; in "%\$1[^\r\n]"; }
