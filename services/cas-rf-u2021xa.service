@@ -9,9 +9,11 @@ After=cas-rf-u2021xa-visa.service
 Restart=always
 RestartSec=10
 Type=simple
+User=iocuser
+Group=ioc
 
-WorkingDirectory=/root/cas-rf-u2021xa/iocBoot/iocpowerMeter
-ExecStart=/usr/bin/procServ -d --chdir /root/cas-rf-u2021xa/iocBoot/iocpowerMeter 20206 ./st.cmd
+WorkingDirectory=/opt/cas-rf-u2021xa/iocBoot/iocpowerMeter
+ExecStart=/usr/local/bin/procServ -f -L - --allow --chdir /opt/cas-rf-u2021xa/iocBoot/iocpowerMeter 20206 ./st.cmd
 
 StandardOutput=syslog
 StandardError=syslog

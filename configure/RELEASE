@@ -29,7 +29,6 @@
 # If using the sequencer, point SNCSEQ at its top directory:
 #SNCSEQ = $(MODULES)/seq-ver
 #
-#U2021XA=/root/cas-rf-u2021xa/U2021XASup
 ASYN=/opt/epics-R3.15.5/modules/asyn4-35
 CALC=/opt/epics-R3.15.5/modules/synApps/calc-R3-7-1
 STREAM=/opt/epics-R3.15.5/modules/StreamDevice-2.8.8

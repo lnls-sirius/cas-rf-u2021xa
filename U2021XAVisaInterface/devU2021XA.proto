@@ -1,0 +1,33 @@
+InTerminator=CR LF;
+ExtraInput=Ignore;
+
+getTracTime{    out "getTracTime"; in "%f"; }
+
+getTimeAxis {
+    ReplyTimeout=5000; ReadTimeout=100; Separator=", ";
+                out "getTimeAxis"; in "[%e]"; }
+getTracData {
+    ReplyTimeout=5000; ReadTimeout=100; Separator=", ";
+                out "getTracData"; in "[%e]"; }
+
+getInstrInfo{ ExtraInput=Ignore;
+                out "getInstrInfo"; in "%\$1[^\r\n]"; }
+
+getResources{ ExtraInput=Ignore; Separator="";
+                out "getResources"; in "%\$1[^\r\n]"; }
+
+getResource{ ExtraInput=Ignore; Separator="";
+                out "getResource"; in "%\$1[^\r\n]"; }
+
+setResource{ out "setResource %s"; in "%s"; }
+
+setTracTime{ out "setTracTime %f"; in "%f"; }
+
+query{ ExtraInput=Ignore; out "query \$2"; in "%\$1[^\r\n]"; }
+write{ ExtraInput=Ignore; out "write \$2"; in "%\$1[^\r\n]"; }
+
+instrConnect{    out "instrConnect";       in "%\$1[^\r\n]"; }
+instrDisconnect{ out "instrDisconnect";    in "%s"; }
+instrConfig{     out "instrConfig";          in "%s"; }
+
+debug{ out "%s"; in "%\$1[^\r\n]"; }
