@@ -29,12 +29,12 @@
 # If using the sequencer, point SNCSEQ at its top directory:
 #SNCSEQ = $(MODULES)/seq-ver
 #
-ASYN=/opt/epics-R3.15.5/modules/asyn4-35
-CALC=/opt/epics-R3.15.5/modules/synApps/calc-R3-7-1
-STREAM=/opt/epics-R3.15.5/modules/StreamDevice-2.8.8
+ASYN=/opt/epics-R3.15.6/modules/asyn4-35
+CALC=/opt/epics-R3.15.6/modules/synApps/calc-R3-7-1
+STREAM=/opt/epics-R3.15.6/modules/StreamDevice-2.8.8
 
 # EPICS_BASE should appear last so earlier modules can override stuff:
-EPICS_BASE=/opt/epics-R3.15.5/base
+EPICS_BASE=/opt/epics-R3.15.6/base
 
 # Set RULES here if you want to use build rules from somewhere
 # other than EPICS_BASE:
