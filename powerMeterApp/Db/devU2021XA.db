@@ -1,22 +1,21 @@
 record(waveform, "$(P)$(R)TracData-Mon"){
     field(DESC, "Trace data")
     field(EGU,  "dBm")
-    field(SCAN, "5 second")
+    field(SCAN, "2 second")
     field(DTYP, "stream")
     field(INP,  "@devU2021XA.proto getTracData $(PORT) $(A)")
     field(FTVL, "FLOAT")
     field(NELM, "26000")
+    field(FLNK, "$(P)$(R)TimeAxis-Mon")
 }
-
-record(acalcout, "$(P)$(R)TracDataScale"){
-    field(EGU, "s")
-	field(DESC, "x scale in seconds")
-	field(CALC, "(B#0)?(IX*A/B):0")
-    field(INPA, "$(P)$(R)TracTime-RB CP")
-    field(INPB, "$(P)$(R)TracData-Mon.NORD CP")
-	field(NELM, "26000")
+record(waveform, "$(P)$(R)TimeAxis-Mon"){
+    field(DESC, "Trace data")
+    field(DTYP, "stream")
+    field(INP,  "@devU2021XA.proto getTimeAxis $(PORT) $(A)")
+    field(EGU,  "ms")
+    field(FTVL, "FLOAT")
+    field(NELM, "26000")
 }
-
 record(bi, "$(P)$(R)VisaResource-RB:Timer"){
     field(SCAN, "10 second")
     field(FLNK, "$(P)$(R)VisaResource-RB")
@@ -75,14 +74,23 @@ record(ao, "$(P)$(R)TracTime-SP"){
 
     field(FLNK, "$(P)$(R)TracTime-RB")
 }
-
 record(stringin, "$(P)$(R)IDN-Mon"){
     field(SCAN, "10 second")
     field(DESC, "SCPI identification string")
-#    field(NELM, "200")
+#    field(NELM, "50")
 #    field(FTVL, "UCHAR")
     field(DTYP, "stream")
     field(INP,  "@devU2021XA.proto query(199,*IDN?) $(PORT) $(A)")
+}
+
+
+record(waveform, "$(P)$(R)Error-Mon"){
+    field(SCAN, "1 second")
+    field(DESC, "Erros")
+    field(NELM, "200")
+    field(FTVL, "UCHAR")
+    field(DTYP, "stream")
+    field(INP,  "@devU2021XA.proto query(199,:SYST:ERR?) $(PORT) $(A)")
 }
 
 record(stringout, "$(P)$(R)InstrDisconnect-Cmd"){
@@ -102,7 +110,7 @@ record(scalcout, "$(P)$(R)AutoReconnectTrigg"){
     field(INPA, "$(P)$(R)AutoReconnect-Enbl CP")
 }
 
-record(seq, "$(P)$(R)ConfigComm"){
+record(seq, "$(P)$(R)ConfigComm-Cmd"){
     field(DESC, "Configure device")
     field(SCAN, "10 second")
     field(PINI, "YES")
@@ -119,9 +127,8 @@ record(seq, "$(P)$(R)ConfigComm"){
     field(DOL3, "1")
     field(LNK3, "$(P)$(R)InstrConfig-Cmd.PROC")
 
-    field(DISV, "0")
-    field(SDIS, "$(P)$(R)AutoReconnectTrigg CP")
-
+   field(DISV, "0")
+   field(SDIS, "$(P)$(R)AutoReconnectTrigg CP")
 }
 
 record(stringout, "$(P)$(R)InstrConnect-Cmd"){
