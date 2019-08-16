@@ -28,6 +28,7 @@ class VisaManager():
 
         self.trac_time = trac_time
         self.trac_time_new = trac_time
+        self.update_time_axis = True
         self.time_axis = []
 
     def list_resources(self):
@@ -38,7 +39,7 @@ class VisaManager():
             logger.info(self.resource_str)
             self.instr = self.rm.open_resource(self.resource_str)
             self.instr.timeout = self.instr_timeout
-
+            #logger.info(self.instr.query(':SYST:ERR?'))
             return str(self.instr)
 
         except Exception as e:
@@ -73,12 +74,17 @@ class VisaManager():
 
         try:
             self.instr.write('*RST')
+            #logger.info(self.instr.query(':SYST:ERR?'))
+            #self.instr.write('*CLS')
+            logger.debug(self.instr.query(':SYST:ERR?'))
             self.instr.write('TRIG:SOUR EXT')
             self.instr.write('INIT:CONT OFF')
             self.instr.write('TRAC:STAT ON')
             self.instr.write('AVER:STAT OFF')
             self.instr.write('SENS:TRAC:TIME {}'.format(self.trac_time_new))
+            logger.info('SENS:TRAC:TIME {}'.format(self.trac_time_new))
             self.trac_time = self.trac_time_new
+            self.update_time_axis = True
             self.instr_configured = True
 
             return ResponseType.OK
@@ -133,8 +139,10 @@ class VisaManager():
                 d_bytes = data[2+x:-1]
 
                 res = [struct.unpack('>f', d_bytes[4*i:4*i+4])[0] for i in range(int(y/4))]
-                if len(res) != len(self.time_axis):
+                if self.update_time_axis:
                     self.time_axis = [self.trac_time * i for i in range(len(res))]
+                    self.update_time_axis = False
+                    logger.info('Time axis updated? {} {}'.format(self.time_axis[0], self.time_axis[-1]))
             else:
                 res = ResponseType.EXCEPTION
                 logger.error('Wrong format response')
@@ -213,7 +221,8 @@ class Comm():
                     try:
                         match = re.search(r'setTracTime (\d+?\.?\d*)', command)
                         if hasattr(match, 'group'):
-                            self.manager.trac_time_new = float(match.group(1))
+                            conv = float(match.group(1))
+                            self.manager.trac_time_new = conv if conv <= 2. else 2.
                             response = self.manager.trac_time_new
                             response = self.manager.instr_config()
                         else:
