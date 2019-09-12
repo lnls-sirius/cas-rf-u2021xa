@@ -9,7 +9,7 @@ RestartSec=10
 Type=simple
 
 WorkingDirectory=/opt/cas-rf-u2021xa/U2021XAVisaInterface
-ExecStart=/usr/bin/python3 /opt/cas-rf-u2021xa/U2021XAVisaInterface/run.py\
+ExecStart=/opt/cas-rf-u2021xa/U2021XAVisaInterface/run.py\
     --resource 'USB0::2391::32536::MY57370012::0::INSTR'\
     --unix-socket-path 'socket-1'
 

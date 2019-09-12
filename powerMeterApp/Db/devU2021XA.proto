@@ -1,7 +1,11 @@
 InTerminator=CR LF;
 ExtraInput=Ignore;
 
+log{ in "%(\$2Log-Mon)[^\r\n]"; }
+debug{ out "%s"; in "%(\$1Debug-RB)[^\r\n]";}
+
 getTracTime{    out "getTracTime"; in "%f"; }
+getPwr{         out "getPwr"; in "%f"; }
 
 getTimeAxis {
     ReplyTimeout=5000; ReadTimeout=100; Separator=", ";
@@ -23,11 +27,22 @@ setResource{ out "setResource %s"; in "%s"; }
 
 setTracTime{ out "setTracTime %f"; in "%f"; }
 
+cmd{ ExtraInput=Ignore; out "write \$2"; log; }
+
 query{ ExtraInput=Ignore; out "query \$2"; in "%\$1[^\r\n]"; }
 write{ ExtraInput=Ignore; out "write \$2"; in "%\$1[^\r\n]"; }
 
+longin{  ExtraInput=Ignore; out "query \$1";  in "%i";}
+longout{ ExtraInput=Ignore; out "write \$1 %i"; log;}
+
+freq_ai{ ExtraInput=Ignore; out "query \$1"; in "%f"; }
+freq_ao{ ExtraInput=Ignore; out "write \$1 %fHz"; log;}
+
+ai{ ExtraInput=Ignore; out "query \$1"; in "%f"; }
+ao{ ExtraInput=Ignore; out "write \$1 %f"; log;}
+
 instrConnect{    out "instrConnect";       in "%\$1[^\r\n]"; }
 instrDisconnect{ out "instrDisconnect";    in "%s"; }
-instrConfig{     out "instrConfig";          in "%s"; }
+instrConfig{     out "instrConfig";        in "%s"; }
 
-debug{ out "%s"; in "%\$1[^\r\n]"; }
+

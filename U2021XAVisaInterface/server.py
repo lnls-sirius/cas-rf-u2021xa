@@ -1,156 +1,12 @@
+#!/usr/bin/python3
 import logging
 import os
 import socket
-import visa
-import struct
 import re
-import usb
+
+from manager import ResponseType, VisaManager
 
 logger = logging.getLogger()
-
-class ResponseType():
-    NO_RESPONSE = 'NO_RESPONSE'
-    WRONG_FORMAT_INPUT = 'WRONG_FORMAT_INPUT'
-    EXCEPTION = 'EXCEPTION'
-    OK = 'OK'
-    INSTR_DISCONNECTED = 'INSTR_DISCONNECTED'
-    INSTR_NOT_CONFIGURED = 'INST_NOT_CONFIGURED'
-    USB_ERROR = 'USB_ERROR'
-
-class VisaManager():
-
-    def __init__(self, resource, trac_time):
-        self.rm = visa.ResourceManager('@py')
-        self.resource_str = resource
-        self.instr = None
-        self.instr_timeout = 5000
-        self.instr_configured = False
-
-        self.trac_time = trac_time
-        self.trac_time_new = trac_time
-        self.update_time_axis = True
-        self.time_axis = []
-
-    def list_resources(self):
-        return str(list(self.rm.list_resources()))
-
-    def instr_connect(self):
-        try:
-            logger.info(self.resource_str)
-            self.instr = self.rm.open_resource(self.resource_str)
-            self.instr.timeout = self.instr_timeout
-            #logger.info(self.instr.query(':SYST:ERR?'))
-            return str(self.instr)
-
-        except Exception as e:
-            logger.exception('instr_connect error')
-            return ResponseType.EXCEPTION + ' {}'.format(e)
-
-
-    def instr_disconnect(self):
-        try:
-            if self.instr:
-                self.instr.clear()
-                self.instr.close()
-                self.instr = None
-
-            return ResponseType.INSTR_DISCONNECTED
-        except:
-            self.instr = None
-            self.instr_configured = False
-
-            logger.exception('instr_disconnect error')
-            return ResponseType.EXCEPTION
-
-    def instr_info(self):
-        if not self.instr:
-            return ResponseType.INSTR_DISCONNECTED
-
-        return self.instr
-
-    def instr_config(self):
-        if not self.instr:
-            return ResponseType.INSTR_DISCONNECTED
-
-        try:
-            self.instr.write('*RST')
-            #logger.info(self.instr.query(':SYST:ERR?'))
-            #self.instr.write('*CLS')
-            logger.debug(self.instr.query(':SYST:ERR?'))
-            self.instr.write('TRIG:SOUR EXT')
-            self.instr.write('INIT:CONT OFF')
-            self.instr.write('TRAC:STAT ON')
-            self.instr.write('AVER:STAT OFF')
-            self.instr.write('SENS:TRAC:TIME {}'.format(self.trac_time_new))
-            logger.info('SENS:TRAC:TIME {}'.format(self.trac_time_new))
-            self.trac_time = self.trac_time_new
-            self.update_time_axis = True
-            self.instr_configured = True
-
-            return ResponseType.OK
-        except:
-            logger.exception('Instr Config')
-            self.instr_configured = False
-            return ResponseType.EXCEPTION
-
-    def instr_query(self, param):
-        if not self.instr:
-            return ResponseType.INSTR_DISCONNECTED
-
-        if not self.instr_configured:
-            return ResponseType.INSTR_NOT_CONFIGURED
-
-        try:
-            return str(self.instr.query(param))
-        except:
-            logger.exception('Instr query')
-            return ResponseType.EXCEPTION
-
-    def instr_write(self, param):
-        if not self.instr:
-            return ResponseType.INSTR_DISCONNECTED
-
-        if not self.instr_configured:
-            return ResponseType.INSTR_NOT_CONFIGURED
-
-        try:
-            return str(self.instr.write(param))
-        except:
-            logger.exception('Instr write')
-            return ResponseType.EXCEPTION
-
-
-    def instr_trac_data(self):
-        if not self.instr:
-            return ResponseType.INSTR_DISCONNECTED
-
-        if not self.instr_configured:
-            return ResponseType.INSTR_NOT_CONFIGURED
-
-        try:
-            self.instr.write('INIT')
-            self.instr.write('TRAC:DATA? MRES')
-            data = self.instr.read_raw()
-            char_data = []
-            if chr(data[0]) == '#':
-                x = int(chr(data[1]))
-                y = int(data[2:2+x])
-
-                d_bytes = data[2+x:-1]
-
-                res = [struct.unpack('>f', d_bytes[4*i:4*i+4])[0] for i in range(int(y/4))]
-                if self.update_time_axis:
-                    self.time_axis = [self.trac_time * i for i in range(len(res))]
-                    self.update_time_axis = False
-                    logger.info('Time axis updated? {} {}'.format(self.time_axis[0], self.time_axis[-1]))
-            else:
-                res = ResponseType.EXCEPTION
-                logger.error('Wrong format response')
-            return str(res)
-        except:
-            logger.exception('Instr trac data')
-            return ResponseType.EXCEPTION
-
 
 class Comm():
     def __init__(self, unix_socket_path, resource, *args, **kwargs):
@@ -215,6 +71,8 @@ class Comm():
                         response =  self.manager.list_resources()
                     elif command == 'getTimeAxis':
                         response =  str(self.manager.time_axis)
+                    elif command == 'getPwr':
+                        response =  str(self.manager.isntr_aver())
 
                 # Set
                 elif command.startswith('setTracTime'):
@@ -278,7 +136,9 @@ class Comm():
                     elif command == 'instrConfig':
                         response = self.manager.instr_config()
 
-                connection.sendall('{}\r\n'.format(response).encode('utf-8'))
+                response = ('{}\r\n'.format(str(response).strip('\n'))).encode('utf-8')
+
+                connection.sendall(response)
                 logger.debug('Command {} Length {}'.format(command, response))
         except:
             logger.exception('Connection exception')

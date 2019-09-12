@@ -1,38 +1,38 @@
+record(waveform, "$(P)$(R)Debug-RB"){
+    field(DESC, "Command Result")
+    field(NELM, "200")
+    field(FTVL, "UCHAR")
+}
+record(stringout, "$(P)$(R)Debug-SP"){
+    field(DTYP, "stream")
+    field(OUT,  "@devU2021XA.proto debug($(P)$(R)) $(PORT) $(A)")
+}
 record(waveform, "$(P)$(R)TracData-Mon"){
     field(DESC, "Trace data")
     field(EGU,  "dBm")
-    field(SCAN, "2 second")
+    field(SCAN, "5 second")
     field(DTYP, "stream")
     field(INP,  "@devU2021XA.proto getTracData $(PORT) $(A)")
     field(FTVL, "FLOAT")
-    field(NELM, "26000")
+    field(NELM, "1000")
     field(FLNK, "$(P)$(R)TimeAxis-Mon")
+}
+record(compress, "$(P)$(R)TracDataAvg-Mon"){
+    field(DESC, "Trace data average")
+    field(INP,  "$(P)$(R)TracData-Mon CP MSS")
+    field(EGU,  "dBm")
+    field(ALG,  "N to 1 Average")
+    field(N,    "1000")
+    field(NSAM, "1")
 }
 record(waveform, "$(P)$(R)TimeAxis-Mon"){
     field(DESC, "Trace data")
+    field(EGU,  "s")
     field(DTYP, "stream")
     field(INP,  "@devU2021XA.proto getTimeAxis $(PORT) $(A)")
-    field(EGU,  "ms")
     field(FTVL, "FLOAT")
-    field(NELM, "26000")
-}
-record(bi, "$(P)$(R)VisaResource-RB:Timer"){
-    field(SCAN, "10 second")
-    field(FLNK, "$(P)$(R)VisaResource-RB")
-}
-record(waveform, "$(P)$(R)VisaResource-RB"){
-    field(DESC, "Visa resource to be connected at")
-    field(NELM, "200")
-    field(FTVL, "UCHAR")
-    field(DTYP, "stream")
-    field(INP,  "@devU2021XA.proto getResource(199) $(PORT) $(A)")
-}
-record(stringout, "$(P)$(R)VisaResource-SP"){
-    field(DESC, "Visa resource to be connected at")
-    field(DTYP, "stream")
-    field(OUT,  "@devU2021XA.proto setResource $(PORT) $(A)")
-
-    field(FLNK, "$(P)$(R)VisaResource-RB")
+    field(NELM, "1000")
+    field(FLNK, "$(P)$(R)TracTime-Mon")
 }
 
 record(waveform, "$(P)$(R)VisaResources-Mon"){
@@ -42,6 +42,11 @@ record(waveform, "$(P)$(R)VisaResources-Mon"){
     field(FTVL, "UCHAR")
     field(DTYP, "stream")
     field(INP,  "@devU2021XA.proto getResources(199) $(PORT) $(A)")
+}
+record(waveform, "$(P)$(R)Log-Mon"){
+    field(DESC, "Command Result")
+    field(NELM, "200")
+    field(FTVL, "UCHAR")
 }
 
 record(waveform, "$(P)$(R)InstrInfo-Mon"){
@@ -58,39 +63,209 @@ record(bi, "$(P)$(R)TracTime-RB:Timer"){
     field(FLNK, "$(P)$(R)TracTime-RB")
 }
 
-record(ai, "$(P)$(R)TracTime-RB"){
-    field(EGU,  "s")
-    field(DESC, "Duration of the trace")
+record(ai, "$(P)$(R)PwrAvg-Mon"){
+    field(EGU,  "dBm")
+    field(SCAN, "5 second")
+    field(DESC, "Average power")
     field(DTYP, "stream")
     field(PREC, "2")
-    field(INP,  "@devU2021XA.proto getTracTime $(PORT) $(A)")
+    field(INP,  "@devU2021XA.proto getPwr $(PORT) $(A)")
 }
 
-record(ao, "$(P)$(R)TracTime-SP"){
-    field(DESC, "TRAC:TIME used to acquire data")
-    field(DTYP, "stream")
-    field(PREC, "2")
-    field(OUT,  "@devU2021XA.proto setTracTime $(PORT) $(A)")
-
-    field(FLNK, "$(P)$(R)TracTime-RB")
-}
-record(stringin, "$(P)$(R)IDN-Mon"){
+record(waveform, "$(P)$(R)IDN-Mon"){
     field(SCAN, "10 second")
     field(DESC, "SCPI identification string")
-#    field(NELM, "50")
-#    field(FTVL, "UCHAR")
+    field(NELM, "200")
+    field(FTVL, "UCHAR")
     field(DTYP, "stream")
     field(INP,  "@devU2021XA.proto query(199,*IDN?) $(PORT) $(A)")
 }
 
-
-record(waveform, "$(P)$(R)Error-Mon"){
-    field(SCAN, "1 second")
-    field(DESC, "Erros")
-    field(NELM, "200")
-    field(FTVL, "UCHAR")
+record(ai, "$(P)$(R)T-Mon"){
+    field(SCAN, "5 second")
     field(DTYP, "stream")
-    field(INP,  "@devU2021XA.proto query(199,:SYST:ERR?) $(PORT) $(A)")
+    field(INP,  "@devU2021XA.proto ai(TEMP?) $(PORT) $(A)")
+    field(PREC, "3")
+    field(EGU,  "C")
+}
+
+record(stringin, "$(P)$(R)SensMode-Mon"){
+    field(PINI, "YES")
+    field(SCAN, "10 second")
+    field(DTYP, "stream")
+    field(INP,  "@devU2021XA.proto query(50,SENS:DET:FUNC?) $(PORT) $(A)")
+}
+
+record(bi, "$(P)$(R)Averaging-Mon"){
+    field(DTYP, "stream")
+    field(INP,  "@devU2021XA.proto ai(AVER?) $(PORT) $(A)")
+    field(ONAM, "Enable")
+    field(ZNAM, "Disable")
+    field(SCAN, "10 second")
+}
+# bit meaning
+# 0   Operation Complete
+# 1   Request Control (not used)
+# 2   Query Error
+# 3   Device Dependent Error
+# 4    Execution Error
+# 5    Command Error
+# 6    User Request
+# 7     Power On
+record(longin, "$(P)$(R)EventStatus-Mon"){
+    field(DESC, "Standard event status register")
+    field(DTYP, "stream")
+    field(INP,  "@devU2021XA.proto longin(*ESR?) $(PORT) $(A)")
+    field(SCAN, "5 second")
+}
+# -----------------------------------------------------
+record(ao, "$(P)$(R)Freq-SP"){
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(OUT,  "@devU2021XA.proto freq_ao(:SENS:FREQ,$(P)$(R)) $(PORT) $(A)")
+    field(FLNK, "$(P)$(R)Freq-RB")
+    field(DISV, "1")
+    field(SDIS, "$(P)$(R)Freq:INIT.PACT")
+    field(EGU,  "Hz")
+}
+record(ai, "$(P)$(R)Freq-RB"){
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(INP,  "@devU2021XA.proto freq_ai(:SENS:FREQ?) $(PORT) $(A)")
+    field(EGU,  "Hz")
+}
+record(seq, "$(P)$(R)Freq:INIT"){
+    field(SCAN, "10 second")
+    field(PINI, "YES")
+    field(PHAS, "1")
+    field(DLY1, "5")
+    field(DOL1, "$(P)$(R)Freq-RB")
+    field(LNK1, "$(P)$(R)Freq-SP PP")
+}
+record(ao, "$(P)$(R)GainOffset-SP"){
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(OUT,  "@devU2021XA.proto ao(:CORR:GAIN2,$(P)$(R)) $(PORT) $(A)")
+    field(FLNK, "$(P)$(R)GainOffset-RB")
+    field(DISV, "1")
+    field(SDIS, "$(P)$(R)GainOffset:INIT.PACT")
+    field(EGU,  "dB")
+}
+record(ai, "$(P)$(R)GainOffset-RB"){
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(INP,  "@devU2021XA.proto ai(:CORR:GAIN2?) $(PORT) $(A)")
+    field(EGU,  "dB")
+}
+record(seq, "$(P)$(R)GainOffset:INIT"){
+    field(SCAN, "10 second")
+    field(PINI, "YES")
+    field(PHAS, "1")
+    field(DLY1, "5")
+    field(DOL1, "$(P)$(R)GainOffset-RB")
+    field(LNK1, "$(P)$(R)GainOffset-SP PP")
+}
+record(bi, "$(P)$(R)GainOffsetStat-Stat"){
+    field(DESC, "Gain offset")
+    field(DTYP, "stream")
+    field(PINI, "YES")
+    field(ONAM, "Enable")
+    field(ZNAM, "Disable")
+    field(INP,  "@devU2021XA.proto longin(:CORR:GAIN2:STAT?,$(P)$(R)) $(PORT) $(A)")
+}
+record(bo, "$(P)$(R)GainOffsetStat-Sel"){
+    field(DESC, "Gain offset")
+    field(DTYP, "stream")
+    field(ONAM, "Enable")
+    field(ZNAM, "Disable")
+    field(DISV, "1")
+    field(SDIS, "$(P)$(R)GainOffsetStat:INIT.PACT")
+    field(FLNK, "$(P)$(R)GainOffsetStat-Stat")
+    field(OUT,  "@devU2021XA.proto longout(:CORR:GAIN2:STAT,$(P)$(R)) $(PORT) $(A)")
+}
+record(seq, "$(P)$(R)GainOffsetStat:INIT"){
+    field(SCAN, "10 second")
+    field(PINI, "YES")
+    field(PHAS, "1")
+    field(DLY1, "5")
+    field(DOL1, "$(P)$(R)GainOffsetStat-Stat")
+    field(LNK1, "$(P)$(R)GainOffsetStat-Sel PP")
+}
+
+record(ao, "$(P)$(R)LossOffset-SP"){
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(OUT,  "@devU2021XA.proto ao(:CORR:LOSS2,$(P)$(R)) $(PORT) $(A)")
+    field(FLNK, "$(P)$(R)LossOffset-RB")
+    field(DISV, "1")
+    field(SDIS, "$(P)$(R)LossOffset:INIT.PACT")
+    field(EGU,  "dB")
+}
+record(ai, "$(P)$(R)LossOffset-RB"){
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(INP,  "@devU2021XA.proto ai(:CORR:LOSS2?) $(PORT) $(A)")
+    field(EGU,  "dB")
+}
+record(seq, "$(P)$(R)LossOffset:INIT"){
+    field(SCAN, "10 second")
+    field(PINI, "YES")
+    field(PHAS, "1")
+    field(DLY1, "5")
+    field(DOL1, "$(P)$(R)LossOffset-RB")
+    field(LNK1, "$(P)$(R)LossOffset-SP PP")
+}
+record(bo, "$(P)$(R)CalAll-Cmd"){
+    field(DESC, "Zero and calibration")
+    field(DTYP, "stream")
+    field(OUT,  "@devU2021XA.proto cmd(:CAL:ALL,$(P)$(R)) $(PORT) $(A)")
+}
+record(bi, "$(P)$(R)LossOffsetStat-Stat"){
+    field(DESC, "Loss offset")
+    field(DTYP, "stream")
+    field(PINI, "YES")
+    field(ONAM, "Enable")
+    field(ZNAM, "Disable")
+    field(INP,  "@devU2021XA.proto longin(:CORR:LOSS2:STAT?,$(P)$(R)) $(PORT) $(A)")
+}
+record(bo, "$(P)$(R)LossOffsetStat-Sel"){
+    field(DESC, "Loss offset")
+    field(DTYP, "stream")
+    field(ONAM, "Enable")
+    field(ZNAM, "Disable")
+    field(DISV, "1")
+    field(SDIS, "$(P)$(R)LossOffsetStat:INIT.PACT")
+    field(OUT,  "@devU2021XA.proto longout(:CORR:LOSS2:STAT,$(P)$(R)) $(PORT) $(A)")
+    field(FLNK, "$(P)$(R)LossOffsetStat-Stat")
+}
+record(seq, "$(P)$(R)LossOffsetStat:INIT"){
+    field(SCAN, "10 second")
+    field(PINI, "YES")
+    field(PHAS, "1")
+    field(DLY1, "5")
+    field(DOL1, "$(P)$(R)LossOffsetStat-Stat")
+    field(LNK1, "$(P)$(R)LossOffsetStat-Sel PP")
+}
+record(ai, "$(P)$(R)TracTime-Mon"){
+    field(EGU,  "s")
+    field(DESC, "Duration of the trace")
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(INP,  "@devU2021XA.proto ai(:SENS:TRAC:TIME?) $(PORT) $(A)")
+}
+record(ai, "$(P)$(R)TracTime-RB"){
+    field(EGU,  "s")
+    field(DESC, "Duration of the trace")
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(INP,  "@devU2021XA.proto getTracTime $(PORT) $(A)")
+}
+record(ao, "$(P)$(R)TracTime-SP"){
+    field(DESC, "TRAC:TIME used to acquire data")
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(OUT,  "@devU2021XA.proto setTracTime $(PORT) $(A)")
+    field(FLNK, "$(P)$(R)TracTime-RB")
 }
 
 record(stringout, "$(P)$(R)InstrDisconnect-Cmd"){
@@ -110,7 +285,7 @@ record(scalcout, "$(P)$(R)AutoReconnectTrigg"){
     field(INPA, "$(P)$(R)AutoReconnect-Enbl CP")
 }
 
-record(seq, "$(P)$(R)ConfigComm-Cmd"){
+record(seq, "$(P)$(R)ConfigComm"){
     field(DESC, "Configure device")
     field(SCAN, "10 second")
     field(PINI, "YES")
@@ -127,10 +302,14 @@ record(seq, "$(P)$(R)ConfigComm-Cmd"){
     field(DOL3, "1")
     field(LNK3, "$(P)$(R)InstrConfig-Cmd.PROC")
 
-   field(DISV, "0")
-   field(SDIS, "$(P)$(R)AutoReconnectTrigg CP")
-}
+    field(DLY4, "1")
+    field(DOL4, "1")
+    field(LNK4, "$(P)$(R)IDN-Mon.PROC")
 
+    field(DISV, "0")
+    field(SDIS, "$(P)$(R)AutoReconnectTrigg CP")
+
+}
 record(stringout, "$(P)$(R)InstrConnect-Cmd"){
     field(DTYP, "stream")
     field(OUT,  "@devU2021XA.proto instrConnect(199) $(PORT) $(A)")
@@ -139,4 +318,23 @@ record(stringout, "$(P)$(R)InstrConnect-Cmd"){
 record(stringout, "$(P)$(R)InstrConfig-Cmd"){
     field(DTYP, "stream")
     field(OUT,  "@devU2021XA.proto instrConfig $(PORT) $(A)")
+}
+
+record(bi, "$(P)$(R)VisaResource-RB:Timer"){
+    field(SCAN, "10 second")
+    field(FLNK, "$(P)$(R)VisaResource-RB")
+}
+record(waveform, "$(P)$(R)VisaResource-RB"){
+    field(DESC, "Visa resource to be connected at")
+    field(NELM, "200")
+    field(FTVL, "UCHAR")
+    field(DTYP, "stream")
+    field(INP,  "@devU2021XA.proto getResource(199) $(PORT) $(A)")
+}
+record(stringout, "$(P)$(R)VisaResource-SP"){
+    field(DESC, "Visa resource to be connected at")
+    field(DTYP, "stream")
+    field(OUT,  "@devU2021XA.proto setResource $(PORT) $(A)")
+
+    field(FLNK, "$(P)$(R)VisaResource-RB")
 }

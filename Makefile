@@ -10,6 +10,6 @@ DIRS := configure
 DIRS += $(wildcard *[Ss]up)
 DIRS += $(wildcard *[Aa]pp)
 DIRS += $(wildcard ioc[Bb]oot)
-DIRS += U2021XAVisaInterface
+#DIRS += U2021XAVisaInterface
 
 include $(TOP)/configure/RULES_TOP

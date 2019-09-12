@@ -7,12 +7,7 @@ StreamDevice based IOC.
 
 ### Usage
 
-Run the Unix socket:
-```
-cd U2021XAVisaInterface
-./run
-```
-
+Start the Unix socket at `U2021XAVisaInterface/run.py`:
 Run the IOC:
 ```
 cd iocBoot/iocpowerMeter
@@ -20,10 +15,9 @@ cd iocBoot/iocpowerMeter
 ```
 
 ### Dependencies
+Virtual environment
 ```
-pyusb==1.0.2
-PyVISA==1.9.1
-PyVISA-py==0.3.1
+pip3 -m virtualenv U2021XAVisaInterface/venv
+source ./U2021XAVisaInterface/venv/bin/activate
+pip3 install -r U2021XAVisaInterface/requirements.txt
 ```
-
-[Reference Visa Script](https://github.com/vclima/power_sensor.git)
