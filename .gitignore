@@ -1,3 +1,12 @@
 *.swp
 *.pyc
 **venv
+visa-pkg
+bin/
+db/
+dbd/
+iocBoot/iocpowerMeter/envPaths
+powerMeterApp/Db/O.linux-x86_64/
+powerMeterApp/src/O.Common/
+powerMeterApp/src/O.linux-x86_64/
+
