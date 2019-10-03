@@ -70,7 +70,7 @@ class VisaManager():
             return ResponseType.INSTR_DISCONNECTED
 
         try:
-            self.instr.write('*RST')            # Reset configuration
+            self.instr.write('*RST') # Reset configuration
             self.instr.write(':TRIG:SOUR EXT')
             self.instr.write(':INIT:CONT OFF')
             self.instr.write(':TRIG:DEL:AUTO OFF')
@@ -86,10 +86,6 @@ class VisaManager():
                 logger.debug(self.instr.query(':SYST:ERR?'))
             except:
                 pass
-            #self.instr.write(':ABORT')
-            #self.instr.write(':TRAC:STAT ON')
-            #self.instr.write(':AVER:STAT OFF')
-            #self.instr.write(':SENS:TRAC:TIME {}'.format(self.trac_time_new))
             self.trac_time = self.trac_time_new
             logger.debug('SENS:TRAC:TIME set to {} seconds'.format(self.trac_time_new))
 
@@ -137,7 +133,7 @@ class VisaManager():
             return ResponseType.INSTR_NOT_CONFIGURED
 
         try:
-            self.instr.write(':INIT')            # Initialize measures
+            self.instr.write(':INIT') # Initialize measures
             self.instr.write(':TRAC:DATA? MRES') # Get 1000 data points
             data = self.instr.read_raw()
             char_data = []
@@ -168,12 +164,6 @@ class VisaManager():
             return ResponseType.INSTR_NOT_CONFIGURED
 
         try:
-            #self.instr.write('TRAC:STAT OFF')
-            #self.instr.write('AVER:STAT ON')
-            #self.instr.write('ABOR')
-            #self.instr.write('CONF')
-            #self.instr.write('SENS1:AVER:COUNT {}'.format(self.aver_count))
-            #self.instr.write('TRIG:DEL:AUTO OFF')
             self.instr.write(':INIT')
             res = self.instr.query(':FETC?')
             logger.debug('instr_aver {}'.format(res))
