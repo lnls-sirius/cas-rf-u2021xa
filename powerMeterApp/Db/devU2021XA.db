@@ -8,6 +8,7 @@ record(stringout, "$(P)$(R)Debug-SP"){
     field(OUT,  "@devU2021XA.proto debug($(P)$(R)) $(PORT) $(A)")
 }
 record(waveform, "$(P)$(R)TracData-Mon"){
+    field(PREC, "4")
     field(DESC, "Trace data")
     field(EGU,  "dBm")
     field(SCAN, "5 second")
