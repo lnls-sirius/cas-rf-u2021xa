@@ -81,6 +81,7 @@ class VisaManager():
             self.instr.write(':CORR:GAIN2:STAT ON')
             self.instr.write(':CORR:LOSS2:STAT OFF')
             self.instr.write(':CORR:GAIN2 73.3')
+            self.instr.write(':TRAC:UNIT W')
             self.instr.write('*CLS') # Clear errors
             try:
                 logger.debug(self.instr.query(':SYST:ERR?'))
@@ -134,7 +135,7 @@ class VisaManager():
 
         try:
             self.instr.write(':INIT') # Initialize measures
-            self.instr.write(':TRAC:DATA? MRES') # Get 1000 data points
+            self.instr.write(':TRAC:DATA? LRES') # Get 240 data points
             data = self.instr.read_raw()
             char_data = []
             if chr(data[0]) == '#':
