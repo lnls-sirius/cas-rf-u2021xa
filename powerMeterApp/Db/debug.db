@@ -1,0 +1,9 @@
+record(waveform, "$(P)$(R)Debug-RB"){
+    field(DESC, "Command Result")
+    field(NELM, "200")
+    field(FTVL, "UCHAR")
+}
+record(stringout, "$(P)$(R)Debug-SP"){
+    field(DTYP, "stream")
+    field(OUT,  "@devU2021XA.proto debug($(P)$(R)) $(PORT) $(A)")
+}
