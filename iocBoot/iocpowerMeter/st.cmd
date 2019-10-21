@@ -15,7 +15,15 @@ drvAsynIPPortConfigure("L0", "unix://${TOP}/U2021XAVisaInterface/socket-1")
 dbLoadRecords("db/devU2021XA.db", "P=RA-RF:PowerSensor1,R=:,PORT=L0,A=0")
 dbLoadRecords("db/debug.db",      "P=RA-RF:PowerSensor1,R=:,PORT=L0,A=0")
 
+save_restoreSet_DatedBackupFiles(1)
+save_restoreSet_NumSeqFiles(2)
+save_restoreSet_SeqPeriodInSeconds(600)
+
 cd "${TOP}/iocBoot/${IOC}"
 iocInit
 
-#var streamDebug 1
+cd "${TOP}"
+create_monitor_set("autosave/Config.req", 10, "P=RA-RF:PowerSensor1,R=:,")
+
+epicsThreadSleep(10)
+fdbrestoreX("Config.sav")

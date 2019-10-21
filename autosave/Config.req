@@ -1,0 +1,5 @@
+RA-RF:PowerSensor1:GainOffsetStat-Sel
+$(P)$(R)Egu-SP
+$(P)$(R)Freq-SP
+$(P)$(R)GainOffset-SP
+$(P)$(R)TracTime-SP
