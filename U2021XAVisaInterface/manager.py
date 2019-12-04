@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 import logging
-import os
 import struct
 import visa
 
 logger = logging.getLogger()
 
-class ResponseType():
+
+class ResponseType:
     NO_RESPONSE = 'NO_RESPONSE'
     WRONG_FORMAT_INPUT = 'WRONG_FORMAT_INPUT'
     EXCEPTION = 'EXCEPTION'
@@ -15,7 +15,8 @@ class ResponseType():
     INSTR_NOT_CONFIGURED = 'INST_NOT_CONFIGURED'
     USB_ERROR = 'USB_ERROR'
 
-class VisaManager():
+
+class VisaManager:
 
     def __init__(self, resource, trac_time):
         self.rm = visa.ResourceManager('@py')
@@ -27,6 +28,8 @@ class VisaManager():
         self.trac_time_new = trac_time
         self.update_time_axis = True
         self.time_axis = []
+        self.freq = 500000000
+        self.gain = 78.61
 
     def list_resources(self):
         return str(list(self.rm.list_resources()))
@@ -42,7 +45,6 @@ class VisaManager():
         except Exception as e:
             logger.exception('instr_connect error')
             return ResponseType.EXCEPTION + ' {}'.format(e)
-
 
     def instr_disconnect(self):
         try:
@@ -70,25 +72,25 @@ class VisaManager():
             return ResponseType.INSTR_DISCONNECTED
 
         try:
-            self.instr.write('*RST') # Reset configuration
+            self.instr.write('*RST')  # Reset configuration
             self.instr.write(':TRIG:SOUR EXT')
             self.instr.write(':INIT:CONT OFF')
             self.instr.write(':TRIG:DEL:AUTO OFF')
             self.instr.write(':TRAC:STAT ON')
             self.instr.write(':AVER:STAT OFF')
             self.instr.write(':SENS:TRAC:TIME {}'.format(self.trac_time_new))
-            self.instr.write(':SENS:FREQ 500000000')
+            self.instr.write(':SENS:FREQ {}'.format(self.freq))
             self.instr.write(':CORR:GAIN2:STAT ON')
             self.instr.write(':CORR:LOSS2:STAT OFF')
-            self.instr.write(':CORR:GAIN2 78.61')
+            self.instr.write(':CORR:GAIN2 {}'.format(self.gain))
             self.instr.write(':TRAC:UNIT W')
-            self.instr.write('*CLS') # Clear errors
+            self.instr.write('*CLS')  # Clear errors
             try:
                 logger.debug(self.instr.query(':SYST:ERR?'))
             except:
                 pass
             self.trac_time = self.trac_time_new
-            logger.debug('SENS:TRAC:TIME set to {} seconds'.format(self.trac_time_new))
+            logger.debug('SENS:TRAC:TIME set to {} seconds'.format(self.trac_time))
 
             self.update_time_axis = True
             self.instr_configured = True
@@ -96,6 +98,24 @@ class VisaManager():
             return ResponseType.OK
         except:
             logger.exception('Instr Config')
+            self.instr_configured = False
+            return ResponseType.EXCEPTION
+
+    def instr_trac_time(self, trac_time):
+        if not self.instr:
+            return ResponseType.INSTR_DISCONNECTED
+
+        trac_time = trac_time if trac_time >= 2. else 2.
+
+        try:
+            self.trac_time_new = trac_time
+            self.instr.write(':SENS:TRAC:TIME {}'.format(self.trac_time_new))
+            self.update_time_axis = True
+            self.trac_time = self.trac_time_new
+            logger.info('SENS:TRAC:TIME set to {} seconds'.format(self.trac_time))
+
+        except:
+            logger.exception('Exception: Update TRAC:TIME.')
             self.instr_configured = False
             return ResponseType.EXCEPTION
 
@@ -109,7 +129,7 @@ class VisaManager():
         try:
             return str(self.instr.query(param))
         except:
-            logger.exception('Instr query')
+            logger.exception('Exception: Instr query {}.'.format(param))
             return ResponseType.EXCEPTION
 
     def instr_write(self, param):
@@ -122,9 +142,8 @@ class VisaManager():
         try:
             return param + ' ' + str(self.instr.write(param))
         except:
-            logger.exception('Instr write')
+            logger.exception('Instr write {}.'.format(param))
             return ResponseType.EXCEPTION
-
 
     def instr_trac_data(self):
         if not self.instr:
@@ -134,41 +153,26 @@ class VisaManager():
             return ResponseType.INSTR_NOT_CONFIGURED
 
         try:
-            self.instr.write(':INIT') # Initialize measures
-            self.instr.write(':TRAC:DATA? LRES') # Get 240 data points
+            self.instr.write(':INIT')  # Initialize measures
+            self.instr.write(':TRAC:DATA? LRES')  # Get 240 data points
             data = self.instr.read_raw()
-            char_data = []
             if chr(data[0]) == '#':
                 x = int(chr(data[1]))
-                y = int(data[2:2+x])
+                y = int(data[2:2 + x])
 
-                d_bytes = data[2+x:-1]
+                d_bytes = data[2 + x:-1]
 
-                res = [struct.unpack('>f', d_bytes[4*i:4*i+4])[0] for i in range(int(y/4))]
+                res = [struct.unpack('>f', d_bytes[4 * i:4 * i + 4])[0] for i in range(int(y / 4))]
                 if self.update_time_axis or len(self.time_axis) != len(res):
-                    self.time_axis = [self.trac_time * i for i in range(len(res))]
+                    time_step = self.trac_time / len(res)
+                    self.time_axis = [time_step * i for i in range(len(res))]
                     self.update_time_axis = False
                     logger.info('Time axis updated? trac_time={} {} {}'.format(self.trac_time,
-                        self.time_axis[0], self.time_axis[-1]))
+                                                                               self.time_axis[0], self.time_axis[-1]))
             else:
                 res = ResponseType.EXCEPTION
-                logger.error('Wrong format response')
+                logger.error('Wrong format response.')
             return str(res)
         except:
-            logger.exception('Instr trac data')
+            logger.exception('Instr trac data.')
             return ResponseType.EXCEPTION
-
-    def isntr_aver(self):
-        if not self.instr:
-            return ResponseType.INSTR_DISCONNECTED
-
-        if not self.instr_configured:
-            return ResponseType.INSTR_NOT_CONFIGURED
-
-        try:
-            self.instr.write(':INIT')
-            res = self.instr.query(':FETC?')
-            logger.debug('instr_aver {}'.format(res))
-            return res
-        except:
-            logger.exception('Power average error')
