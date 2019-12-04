@@ -8,7 +8,8 @@ from manager import ResponseType, VisaManager
 
 logger = logging.getLogger()
 
-class Comm():
+
+class Comm:
     def __init__(self, unix_socket_path, resource, *args, **kwargs):
         self.unix_socket_path = unix_socket_path
         self.connection = None
@@ -66,13 +67,11 @@ class Comm():
                     elif command == 'getInstrInfo':
                         response = self.manager.instr_info()
                     elif command == 'getResource':
-                        response =  self.manager.resource_str
+                        response = self.manager.resource_str
                     elif command == 'getResources':
-                        response =  self.manager.list_resources()
+                        response = self.manager.list_resources()
                     elif command == 'getTimeAxis':
-                        response =  str(self.manager.time_axis)
-                    elif command == 'getPwr':
-                        response =  str(self.manager.isntr_aver())
+                        response = str(self.manager.time_axis)
 
                 # Set
                 elif command.startswith('setTracTime'):
@@ -145,4 +144,3 @@ class Comm():
         finally:
             logger.warning('Connection closed')
             connection.close()
-
