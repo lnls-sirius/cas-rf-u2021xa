@@ -78,10 +78,7 @@ class Comm:
                     try:
                         match = re.search(r'setTracTime (\d+?\.?\d*)', command)
                         if hasattr(match, 'group'):
-                            conv = float(match.group(1))
-                            self.manager.trac_time_new = conv if conv <= 2. else 2.
-                            response = self.manager.trac_time_new
-                            response = self.manager.instr_config()
+                            response = self.manager.instr_trac_time(float(match.group(1)))
                         else:
                             response = ResponseType.WRONG_FORMAT_INPUT
 
