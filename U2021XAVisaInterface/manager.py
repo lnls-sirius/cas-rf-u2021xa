@@ -164,7 +164,8 @@ class VisaManager:
 
                 res = [struct.unpack('>f', d_bytes[4 * i:4 * i + 4])[0] for i in range(int(y / 4))]
                 if self.update_time_axis or len(self.time_axis) != len(res):
-                    self.time_axis = [self.trac_time * i for i in range(len(res))]
+                    time_step = self.trac_time / len(res)
+                    self.time_axis = [time_step * i for i in range(len(res))]
                     self.update_time_axis = False
                     logger.info('Time axis updated? trac_time={} {} {}'.format(self.trac_time,
                                                                                self.time_axis[0], self.time_axis[-1]))
