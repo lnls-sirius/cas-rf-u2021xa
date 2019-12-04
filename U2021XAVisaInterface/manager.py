@@ -77,10 +77,10 @@ class VisaManager():
             self.instr.write(':TRAC:STAT ON')
             self.instr.write(':AVER:STAT OFF')
             self.instr.write(':SENS:TRAC:TIME {}'.format(self.trac_time_new))
-            self.instr.write(':SENS:FREQ 500000000'.format(self.trac_time_new))
+            self.instr.write(':SENS:FREQ 500000000')
             self.instr.write(':CORR:GAIN2:STAT ON')
             self.instr.write(':CORR:LOSS2:STAT OFF')
-            self.instr.write(':CORR:GAIN2 73.3')
+            self.instr.write(':CORR:GAIN2 78.61')
             self.instr.write(':TRAC:UNIT W')
             self.instr.write('*CLS') # Clear errors
             try:
@@ -148,7 +148,8 @@ class VisaManager():
                 if self.update_time_axis or len(self.time_axis) != len(res):
                     self.time_axis = [self.trac_time * i for i in range(len(res))]
                     self.update_time_axis = False
-                    logger.info('Time axis updated? {} {}'.format(self.time_axis[0], self.time_axis[-1]))
+                    logger.info('Time axis updated? trac_time={} {} {}'.format(self.trac_time,
+                        self.time_axis[0], self.time_axis[-1]))
             else:
                 res = ResponseType.EXCEPTION
                 logger.error('Wrong format response')
