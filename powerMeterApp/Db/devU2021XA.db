@@ -225,15 +225,6 @@ record(bo, "$(P)$(R)CalAll-Cmd"){
     field(DTYP, "stream")
     field(OUT,  "@devU2021XA.proto cmd(:CAL:ALL,$(P)$(R)) $(PORT) $(A)")
 }
-record(bi, "$(P)$(R)LossOffsetStat-Stat"){
-    field(DESC, "Loss offset")
-    field(DTYP, "stream")
-    field(PINI, "YES")
-    field(ONAM, "Enable")
-    field(ZNAM, "Disable")
-    field(INP,  "@devU2021XA.proto longin(:CORR:LOSS2:STAT?,$(P)$(R)) $(PORT) $(A)")
-    field(PHAS, "0")
-}
 record(ai, "$(P)$(R)TracTime-Mon"){
     field(EGU,  "s")
     field(DESC, "Duration of the trace")

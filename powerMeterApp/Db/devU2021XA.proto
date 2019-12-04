@@ -5,7 +5,6 @@ log{ in "%(\$2Log-Mon)[^\r\n]"; }
 debug{ out "%s"; in "%(\$1Debug-RB)[^\r\n]";}
 
 getTracTime{    out "getTracTime"; in "%f"; }
-getPwr{         out "getPwr"; in "%f"; }
 
 getTimeAxis {
     ReplyTimeout=5000; ReadTimeout=100; Separator=", ";
