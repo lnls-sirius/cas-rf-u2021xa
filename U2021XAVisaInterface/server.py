@@ -8,6 +8,7 @@ from manager import ResponseType, VisaManager
 
 logger = logging.getLogger()
 
+SET_TRAC_TIME_REG = re.compile(r'setTracTime (\d+\.?\d*)')
 
 class Comm:
     def __init__(self, unix_socket_path, resource, *args, **kwargs):
@@ -76,8 +77,8 @@ class Comm:
                 # Set
                 elif command.startswith('setTracTime'):
                     try:
-                        match = re.search(r'setTracTime (\d+?\.?\d*)', command)
-                        if hasattr(match, 'group'):
+                        match = SET_TRAC_TIME_REG.search(command)
+                        if match:
                             response = self.manager.instr_trac_time(float(match.group(1)))
                         else:
                             response = ResponseType.WRONG_FORMAT_INPUT

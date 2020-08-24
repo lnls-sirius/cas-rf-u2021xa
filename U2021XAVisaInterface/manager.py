@@ -105,7 +105,12 @@ class VisaManager:
         if not self.instr:
             return ResponseType.INSTR_DISCONNECTED
 
-        trac_time = trac_time if trac_time >= 2. else 2.
+        if trac_time > 2:
+            logger.warning('Trac time "{}" cannot be larger then "2"'.format(trac_time))
+            trac_time = 2
+        elif trac_time < 0:
+            logger.warning('Trac time "{}" cannot be less then "0"'.format(trac_time))
+            trac_time = 0.0001
 
         try:
             self.trac_time_new = trac_time
