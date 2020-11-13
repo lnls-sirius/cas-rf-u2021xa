@@ -20,6 +20,7 @@ powerMeter_DBD += asyn.dbd
 powerMeter_DBD += stream.dbd
 powerMeter_DBD += drvAsynIPPort.dbd
 powerMeter_DBD += asSupport.dbd
+powerMeter_DBD += caPutLog.dbd
 
 # Include dbd files from all support applications:
 #powerMeter_DBD += xxx.dbd
@@ -29,6 +30,7 @@ powerMeter_LIBS += stream
 powerMeter_LIBS += asyn
 powerMeter_LIBS += calc
 powerMeter_LIBS += autosave
+powerMeter_LIBS += caPutLog
 
 # powerMeter_registerRecordDeviceDriver.cpp derives from powerMeter.dbd
 powerMeter_SRCS += powerMeter_registerRecordDeviceDriver.cpp

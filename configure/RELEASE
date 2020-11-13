@@ -1,9 +1,10 @@
-ASYN=/opt/epics-R3.15.6/modules/asyn4-35
-CALC=/opt/epics-R3.15.6/modules/synApps/calc-R3-7-1
-AUTOSAVE=/opt/epics-R3.15.6/modules/autosave-R5-9
-STREAM=/opt/epics-R3.15.6/modules/StreamDevice-2.8.8
+ASYN=/opt/epics-R3.15.8/modules/asyn4-35
+CALC=/opt/epics-R3.15.8/modules/synApps/calc-R3-7-1
+AUTOSAVE=/opt/epics-R3.15.8/modules/autosave-R5-9
+STREAM=/opt/epics-R3.15.8/modules/StreamDevice-2.8.8
+CAPUTLOG=/opt/epics-R3.15.8/modules/caPutLog-R3.6
 
-EPICS_BASE=/opt/epics-R3.15.6/base
+EPICS_BASE=/opt/epics-R3.15.8/base
 
 -include $(TOP)/../RELEASE.local
 -include $(TOP)/configure/RELEASE.local

@@ -37,7 +37,7 @@ longin{  ExtraInput=Ignore; out "query \$1";  in "%i";}
 longout{ ExtraInput=Ignore; out "write \$1 %i"; log;}
 
 freq_ai{ ExtraInput=Ignore; out "query \$1"; in "%f"; }
-freq_ao{ ExtraInput=Ignore; out "write \$1 %fHz"; log;}
+freq_ao{ ExtraInput=Ignore; out "write \$1 %fHz"; log; }
 
 ai{ ExtraInput=Ignore; out "query \$1"; in "%f"; }
 ao{ ExtraInput=Ignore; out "write \$1 %f"; log;}
