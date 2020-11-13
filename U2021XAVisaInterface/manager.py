@@ -32,6 +32,7 @@ class VisaManager:
         try:
             with open("config.json", "r") as f:
                 config = json.load(f)
+                self.unit = config["unit"]
                 self.gain = config["gain"]
                 self.freq = config["freq"]
                 self.trac_time = config["trac_time"]
@@ -41,6 +42,7 @@ class VisaManager:
             logger.exception(
                 "Failed to load from config.json, falling back to defaults"
             )
+            self.unit = "DBM"
             self.freq = 500000000
             self.gain = 74.3
             self.trac_time = 0.41
@@ -48,7 +50,12 @@ class VisaManager:
 
     def dump_config(self):
         try:
-            config = {"gain": self.gain, "freq": self.freq, "trac_time": self.trac_time}
+            config = {
+                "gain": self.gain,
+                "freq": self.freq,
+                "trac_time": self.trac_time,
+                "unit": self.unit,
+            }
 
             with open("config.json", "w+") as f:
                 json.dump(config, f)
@@ -108,7 +115,7 @@ class VisaManager:
             self.instr.write(":CORR:GAIN2:STAT ON")
             self.instr.write(":CORR:LOSS2:STAT OFF")
             self.instr.write(":CORR:GAIN2 {}".format(self.gain))
-            self.instr.write(":TRAC:UNIT W")
+            self.instr.write(":TRAC:UNIT {}".format(self.unit))
             self.instr.write("*CLS")  # Clear errors
             try:
                 logger.debug(self.instr.query(":SYST:ERR?"))
@@ -173,9 +180,18 @@ class VisaManager:
 
         try:
             logger.info("Instrument write '{}'".format(param))
+
             if param.startswith(":CORR:GAIN2"):
                 self.gain = float(param.split(" ")[1])
                 self.dump_config()
+
+            elif param.startswith(":TRAC:UNIT"):
+                self.unit = param.split(" ")[1]
+                self.dump_config()
+
+            res = self.instr.write(param)
+            logger.info("Intr write status {}".format(res))
+
             return param + " " + str(self.instr.write(param))
         except:
             logger.exception("Instr write {}.".format(param))
