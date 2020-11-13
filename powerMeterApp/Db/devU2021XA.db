@@ -9,7 +9,7 @@ record(mbbo, "$(P)$(R)Egu-SP"){
     field(ZRVL, "0")
     field(ONVL, "1")
     field(ZRST, "W")
-    field(ONST, "dBm")
+    field(ONST, "DBM")
     
     field(DISV, "1")
     field(SDIS, "$(P)$(R)Egu_init.PACT")

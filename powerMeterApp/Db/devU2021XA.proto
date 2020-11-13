@@ -31,7 +31,7 @@ cmd{ ExtraInput=Ignore; out "write \$2"; log; }
 query{ ExtraInput=Ignore; out "query \$2"; in "%\$1[^\r\n]"; }
 write{ ExtraInput=Ignore; out "write \$2"; in "%\$1[^\r\n]"; }
 
-write_str{ ExtraInput=Ignore; out "write \$2 %s"; in "%\$1[^\r\n]"; }
+write_str{ ExtraInput=Ignore; out "write \$2 %s"}
 
 longin{  ExtraInput=Ignore; out "query \$1";  in "%i";}
 longout{ ExtraInput=Ignore; out "write \$1 %i"; log;}
