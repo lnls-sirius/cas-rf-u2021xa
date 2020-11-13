@@ -43,7 +43,7 @@ class VisaManager:
                 "Failed to load from config.json, falling back to defaults"
             )
             self.unit = "DBM"
-            self.freq = 500000000
+            self.freq = "500000000Hz"
             self.gain = 74.3
             self.trac_time = 0.41
             self.trac_time_new = self.trac_time
@@ -187,6 +187,10 @@ class VisaManager:
 
             elif param.startswith(":TRAC:UNIT"):
                 self.unit = param.split(" ")[1]
+                self.dump_config()
+
+            elif param.startswith(":TRAC:UNIT"):
+                self.freq = param.split(" ")[1]
                 self.dump_config()
 
             res = self.instr.write(param)
