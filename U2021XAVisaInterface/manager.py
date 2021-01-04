@@ -5,7 +5,7 @@ import visa
 import json
 
 logger = logging.getLogger()
-
+CONFIG_FILE = "./settings/config.json"
 
 class ResponseType:
     NO_RESPONSE = "NO_RESPONSE"
@@ -30,7 +30,7 @@ class VisaManager:
 
     def load_config(self):
         try:
-            with open("./settings/config.json", "r") as f:
+            with open(CONFIG_FILE, "r") as f:
                 config = json.load(f)
                 self.unit = config["unit"]
                 self.gain = config["gain"]
@@ -48,6 +48,9 @@ class VisaManager:
             self.trac_time = 0.41
             self.trac_time_new = self.trac_time
 
+            logger.info("Attempting to dump the fresh")
+            self.dump_config()
+
     def dump_config(self):
         try:
             config = {
@@ -57,7 +60,7 @@ class VisaManager:
                 "unit": self.unit,
             }
 
-            with open("config.json", "w+") as f:
+            with open(CONFIG_FILE, "w+") as f:
                 json.dump(config, f)
             logger.info("Update config.json")
         except:
