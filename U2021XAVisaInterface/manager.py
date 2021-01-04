@@ -30,7 +30,7 @@ class VisaManager:
 
     def load_config(self):
         try:
-            with open("config.json", "r") as f:
+            with open("./settings/config.json", "r") as f:
                 config = json.load(f)
                 self.unit = config["unit"]
                 self.gain = config["gain"]
