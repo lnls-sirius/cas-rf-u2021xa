@@ -32,7 +32,6 @@ class Comm:
 
             self.welcome_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             self.welcome_socket.bind(self.unix_socket_path)
-            os.system("chown iocuser:ioc {}".format(self.unix_socket_path))
 
             logger.info("Unix socket created at {}".format(self.unix_socket_path))
             self.welcome_socket.listen(1)
