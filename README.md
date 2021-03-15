@@ -34,4 +34,4 @@ yum install ni-visa
 sudo dkms autoinstall
 ```
 
-https://www.ni.com/pt-br/support/documentation/supplemental/18/downloading-and-installing-ni-driver-software-on-linux-desktop.html
+More info at https://www.ni.com/pt-br/support/documentation/supplemental/18/downloading-and-installing-ni-driver-software-on-linux-desktop.html
