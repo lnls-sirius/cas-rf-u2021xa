@@ -30,7 +30,7 @@ pip3 install -r U2021XAVisaInterface/requirements.txt
 wget https://download.ni.com/support/softlib/MasterRepository/LinuxDrivers2020/NILinux2020DeviceDrivers.zip
 unzip NILinux2020DeviceDrivers.zip
 yum install ni-software-2020-20.1.0.49152-0+f0.el7.noarch.rpm
-yum install ni-visa
+yum install ni-visa ni-serial ni-488 libusb-ni1 libni4882 libusb
 sudo dkms autoinstall
 ```
 
