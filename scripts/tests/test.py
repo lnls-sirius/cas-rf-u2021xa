@@ -108,7 +108,6 @@ if __name__ == "__main__":
         # Check for isses, clear if needed
         try:
             data = read_waveform(instr)
-            print(data)
         except:
             logger.exception("Failed to read")
             logger.info(f"Trying to clear device {rm.last_status}")
