@@ -31,7 +31,7 @@ wget https://download.ni.com/support/softlib/MasterRepository/LinuxDrivers2020/N
 unzip NILinux2020DeviceDrivers.zip
 yum install ni-software-2020-20.1.0.49152-0+f0.el7.noarch.rpm
 yum install ni-visa ni-serial ni-488 libusb-ni1 libni4882 libusb
-sudo dkms autoinstall
+dkms autoinstall
 ```
 
 More info at https://www.ni.com/pt-br/support/documentation/supplemental/18/downloading-and-installing-ni-driver-software-on-linux-desktop.html
