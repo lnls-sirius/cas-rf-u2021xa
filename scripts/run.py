@@ -26,7 +26,7 @@ if __name__ == "__main__":
     )
     logger = logging.getLogger()
 
-    from server import Comm
+    from devicecomm.server import Comm
 
     comm = Comm(args.unix_socket_path, args.resource)
     comm.serve()

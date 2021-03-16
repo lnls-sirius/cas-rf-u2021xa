@@ -1,11 +1,19 @@
-#!/usr/bin/python3
 import logging
-import struct
 import visa
 import json
 
 logger = logging.getLogger()
 CONFIG_FILE = "./settings/config.json"
+
+from devicecomm.utility import (
+    send_commands_to_resource,
+    close_resources,
+    list_nivisa_resources,
+    check_resource_erros,
+    read_waveform,
+    configure_resource,
+)
+
 
 class ResponseType:
     NO_RESPONSE = "NO_RESPONSE"
@@ -19,7 +27,10 @@ class ResponseType:
 
 class VisaManager:
     def __init__(self, resource):
-        self.rm = visa.ResourceManager("@py")
+        close_resources()
+        list_nivisa_resources()
+
+        self.rm = visa.ResourceManager()
         self.resource_str = resource
         self.instr = None
         self.instr_timeout = 5000
@@ -107,19 +118,15 @@ class VisaManager:
             return ResponseType.INSTR_DISCONNECTED
 
         try:
-            self.instr.write("*RST")  # Reset configuration
-            self.instr.write(":TRIG:SOUR EXT")
-            self.instr.write(":INIT:CONT OFF")
-            self.instr.write(":TRIG:DEL:AUTO OFF")
-            self.instr.write(":TRAC:STAT ON")
-            self.instr.write(":AVER:STAT OFF")
-            self.instr.write(":SENS:TRAC:TIME {}".format(self.trac_time_new))
-            self.instr.write(":SENS:FREQ {}".format(self.freq))
-            self.instr.write(":CORR:GAIN2:STAT ON")
-            self.instr.write(":CORR:LOSS2:STAT OFF")
-            self.instr.write(":CORR:GAIN2 {}".format(self.gain))
-            self.instr.write(":TRAC:UNIT {}".format(self.unit))
-            self.instr.write("*CLS")  # Clear errors
+            configure_resource(
+                resource=self.instr,
+                trac_time_new=self.trac_time_new,
+                freq=self.freq,
+                gain=self.gain,
+                unit=self.unit,
+            )
+
+            send_commands_to_resource(self.instr, commands)
             try:
                 logger.debug(self.instr.query(":SYST:ERR?"))
             except:
@@ -212,32 +219,16 @@ class VisaManager:
             return ResponseType.INSTR_NOT_CONFIGURED
 
         try:
-            self.instr.write(":INIT")  # Initialize measures
-            self.instr.write(":TRAC:DATA? LRES")  # Get 240 data points
-            data = self.instr.read_raw()
-            if chr(data[0]) == "#":
-                x = int(chr(data[1]))
-                y = int(data[2 : 2 + x])
+            values = read_waveform(self.instr)
 
-                d_bytes = data[2 + x : -1]
-
-                res = [
-                    struct.unpack(">f", d_bytes[4 * i : 4 * i + 4])[0]
-                    for i in range(int(y / 4))
-                ]
-                if self.update_time_axis or len(self.time_axis) != len(res):
-                    time_step = self.trac_time / len(res)
-                    self.time_axis = [time_step * i for i in range(len(res))]
-                    self.update_time_axis = False
-                    logger.info(
-                        "Time axis updated? trac_time={} {} {}".format(
-                            self.trac_time, self.time_axis[0], self.time_axis[-1]
-                        )
-                    )
-            else:
-                res = ResponseType.EXCEPTION
-                logger.error("Wrong format response.")
-            return str(res)
+            if self.update_time_axis or len(self.time_axis) != len(values):
+                time_step = self.trac_time / len(values)
+                self.time_axis = [time_step * i for i in range(len(values))]
+                self.update_time_axis = False
+                logger.info(
+                    f"Time axis updated {self.trac_time}, trac_time=[{self.time_axis[0]},{self.time_axis[-1]}]"
+                )
+            return str(values)
         except:
             logger.exception("Instr trac data.")
             return ResponseType.EXCEPTION
