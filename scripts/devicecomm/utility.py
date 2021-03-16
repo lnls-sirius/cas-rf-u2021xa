@@ -13,8 +13,6 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-pyvisa.log_to_screen()
-
 
 def get_resource_idn(resource: pyvisa.Resource):
     res = resource.query("*IDN?")
@@ -125,7 +123,6 @@ def read_waveform(resource: pyvisa.Resource) -> typing.List:
     res = [
         struct.unpack(">f", d_bytes[4 * i : 4 * i + 4])[0] for i in range(int(y / 4))
     ]
-    print(res)
     return res
 
 

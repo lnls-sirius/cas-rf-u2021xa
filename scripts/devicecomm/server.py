@@ -17,7 +17,7 @@ class Comm:
         self.connection = None
         self.welcome_socket = None
 
-        self.manager = VisaManager(resource=resource)
+        self.manager = VisaManager(resource_str=resource)
 
     def serve(self):
         try:

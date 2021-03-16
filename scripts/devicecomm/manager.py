@@ -1,91 +1,53 @@
 import logging
 import visa
-import json
 
 logger = logging.getLogger()
-CONFIG_FILE = "./settings/config.json"
 
+from devicecomm.consts import ResponseType
+from devicecomm.config import ConfigManager
 from devicecomm.utility import (
-    send_commands_to_resource,
-    close_resources,
-    list_nivisa_resources,
     check_resource_erros,
-    read_waveform,
+    close_resources,
     configure_resource,
+    list_nivisa_resources,
+    read_waveform,
+    send_commands_to_resource,
 )
 
 
-class ResponseType:
-    NO_RESPONSE = "NO_RESPONSE"
-    WRONG_FORMAT_INPUT = "WRONG_FORMAT_INPUT"
-    EXCEPTION = "EXCEPTION"
-    OK = "OK"
-    INSTR_DISCONNECTED = "INSTR_DISCONNECTED"
-    INSTR_NOT_CONFIGURED = "INST_NOT_CONFIGURED"
-    USB_ERROR = "USB_ERROR"
-
-
 class VisaManager:
-    def __init__(self, resource):
+    def __init__(self, resource_str):
         close_resources()
         list_nivisa_resources()
 
+        self.config = ConfigManager()
+
         self.rm = visa.ResourceManager()
-        self.resource_str = resource
+
+        self.resource_str = resource_str
         self.instr = None
         self.instr_timeout = 5000
         self.instr_configured = False
-        self.update_time_axis = True
+        self.sould_update_time_axis = True
         self.time_axis = []
+
         self.load_config()
 
     def load_config(self):
-        try:
-            with open(CONFIG_FILE, "r") as f:
-                config = json.load(f)
-                self.unit = config["unit"]
-                self.gain = config["gain"]
-                self.freq = config["freq"]
-                self.trac_time = config["trac_time"]
-                self.trac_time_new = self.trac_time
-                logger.info("Loaded '{}' from config.json".format(config))
-        except:
-            logger.exception(
-                "Failed to load from config.json, falling back to defaults"
-            )
-            self.unit = "DBM"
-            self.freq = "500000000Hz"
-            self.gain = 74.3
-            self.trac_time = 0.41
-            self.trac_time_new = self.trac_time
-
-            logger.info("Attempting to dump the fresh")
-            self.dump_config()
+        self.config.load_config()
 
     def dump_config(self):
-        try:
-            config = {
-                "gain": self.gain,
-                "freq": self.freq,
-                "trac_time": self.trac_time,
-                "unit": self.unit,
-            }
-
-            with open(CONFIG_FILE, "w+") as f:
-                json.dump(config, f)
-            logger.info("Update config.json")
-        except:
-            logger.exception("Failed to dump config")
+        self.config.dump_config()
 
     def list_resources(self):
         return str(list(self.rm.list_resources()))
 
     def instr_connect(self):
         try:
-            logger.info(self.resource_str)
+            logger.info(f"Attempting to connect at {self.resource_str}")
             self.instr = self.rm.open_resource(self.resource_str)
             self.instr.timeout = self.instr_timeout
-            logger.debug("Isntr {} connected".format(self.resource_str))
+            logger.debug("Instrument {self.resource_str} connected")
             return str(self.instr)
 
         except Exception as e:
@@ -120,10 +82,10 @@ class VisaManager:
         try:
             configure_resource(
                 resource=self.instr,
-                trac_time_new=self.trac_time_new,
-                freq=self.freq,
-                gain=self.gain,
-                unit=self.unit,
+                trac_time_new=self.config.trac_time_new,
+                freq=self.config.freq,
+                gain=self.config.gain,
+                unit=self.config.unit,
             )
 
             send_commands_to_resource(self.instr, commands)
@@ -131,10 +93,13 @@ class VisaManager:
                 logger.debug(self.instr.query(":SYST:ERR?"))
             except:
                 pass
-            self.trac_time = self.trac_time_new
-            logger.debug("SENS:TRAC:TIME set to {} seconds".format(self.trac_time))
 
-            self.update_time_axis = True
+            self.config.update_trac_time()
+            logger.debug(
+                "SENS:TRAC:TIME set to {} seconds".format(self.config.trac_time)
+            )
+
+            self.sould_update_time_axis = True
             self.instr_configured = True
 
             return ResponseType.OK
@@ -155,11 +120,13 @@ class VisaManager:
             trac_time = 0.0001
 
         try:
-            self.trac_time_new = trac_time
-            self.instr.write(":SENS:TRAC:TIME {}".format(self.trac_time_new))
-            self.update_time_axis = True
-            self.trac_time = self.trac_time_new
-            logger.info("SENS:TRAC:TIME set to {} seconds".format(self.trac_time))
+            self.config.trac_time_new = trac_time
+            self.instr.write(":SENS:TRAC:TIME {}".format(self.config.trac_time_new))
+            self.sould_update_time_axis = True
+            self.config.trac_time = self.config.trac_time_new
+            logger.info(
+                "SENS:TRAC:TIME set to {} seconds".format(self.config.trac_time)
+            )
 
         except:
             logger.exception("Exception: Update TRAC:TIME.")
@@ -192,15 +159,15 @@ class VisaManager:
             logger.info("Instrument write '{}'".format(param))
 
             if param.startswith(":CORR:GAIN2"):
-                self.gain = float(param.split(" ")[1])
+                self.config.gain = float(param.split(" ")[1])
                 self.dump_config()
 
             elif param.startswith(":TRAC:UNIT"):
-                self.unit = param.split(" ")[1]
+                self.config.unit = param.split(" ")[1]
                 self.dump_config()
 
             elif param.startswith(":TRAC:UNIT"):
-                self.freq = param.split(" ")[1]
+                self.config.freq = param.split(" ")[1]
                 self.dump_config()
 
             res = self.instr.write(param)
@@ -210,6 +177,14 @@ class VisaManager:
         except:
             logger.exception("Instr write {}.".format(param))
             return ResponseType.EXCEPTION
+
+    def update_time_axis(self, readings):
+        time_step = self.config.trac_time / readings
+        self.time_axis = [time_step * i for i in range(readings))]
+        self.sould_update_time_axis = False
+        logger.info(
+            f"Time axis updated {self.config.trac_time}, trac_time=[{self.time_axis[0]},{self.time_axis[-1]}]"
+        )
 
     def instr_trac_data(self):
         if not self.instr:
@@ -221,13 +196,10 @@ class VisaManager:
         try:
             values = read_waveform(self.instr)
 
-            if self.update_time_axis or len(self.time_axis) != len(values):
-                time_step = self.trac_time / len(values)
-                self.time_axis = [time_step * i for i in range(len(values))]
-                self.update_time_axis = False
-                logger.info(
-                    f"Time axis updated {self.trac_time}, trac_time=[{self.time_axis[0]},{self.time_axis[-1]}]"
-                )
+            if self.sould_update_time_axis or len(self.time_axis) != len(values):
+                readings = len(values)
+                self.update_time_axis(readings)
+
             return str(values)
         except:
             logger.exception("Instr trac data.")
