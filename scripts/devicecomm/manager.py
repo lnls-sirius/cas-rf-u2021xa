@@ -1,6 +1,6 @@
-import logging
-import visa
+import pyvisa as visa
 
+from devicecomm.log import get_logger
 from devicecomm.consts import ResponseType
 from devicecomm.config import ConfigManager
 from devicecomm.utility import (
@@ -10,7 +10,7 @@ from devicecomm.utility import (
     read_waveform,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class VisaManager:
@@ -39,7 +39,11 @@ class VisaManager:
         self.config.dump_config()
 
     def list_resources(self):
-        return str(list(self.rm.list_resources()))
+        resouces = []
+        for res in self.rm.list_resources():
+            if "USB" in res:
+                resouces.append(res)
+        return str(resouces)
 
     def instr_connect(self):
         try:

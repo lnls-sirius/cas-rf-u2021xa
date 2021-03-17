@@ -1,7 +1,7 @@
-import logging
 import json
+from devicecomm.log import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 CONFIG_FILE = "./settings/config.json"
 
 

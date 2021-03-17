@@ -3,27 +3,15 @@ import pyvisa as visa
 import time
 import argparse
 import typing
-import logging
 
 from devicecomm.utility import (
-    close_resources,
-    get_resource_idn,
-    list_nivisa_resources,
-    send_commands_to_resource,
     read_waveform,
     configure_resource,
+    get_logger,
 )
 
-import logging
-import logging.handlers
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-ch = logging.StreamHandler()
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+logger = get_logger()
 
 
 def connect(
@@ -32,7 +20,7 @@ def connect(
     visa.log_to_screen()
     rm = visa.ResourceManager()
     resources = rm.list_resources()
-    if not resource_name in resources:
+    if resource_name not in resources:
         raise Exception(f"Resource {resource_name} not available in {resources}")
 
     instr = rm.open_resource(resource_name)
@@ -114,7 +102,7 @@ if __name__ == "__main__":
             try:
                 configure_resource(resource=instr)
             except:
-                logger.exception(f"OMG!! failed to clear")
+                logger.exception("OMG!! failed to clear")
 
         time.sleep(2)
 

@@ -1,10 +1,11 @@
-import logging
 import re
 
 from devicecomm.consts import ResponseType
 from devicecomm.manager import VisaManager
+from devicecomm.log import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
+
 SET_TRAC_TIME_REG = re.compile(r"setTracTime (\d+\.?\d*)")
 
 
@@ -15,7 +16,7 @@ class CommandHandler:
     def handle_get(self, command: str):
         response = ""
         if command == "getTracTime":
-            response = self.manager.trac_time
+            response = self.manager.config.trac_time
         elif command == "getTracData":
             response = self.manager.instr_trac_data()
         elif command == "getInstrInfo":
@@ -83,12 +84,14 @@ class CommandHandler:
                 response = self.handle_get(command)
 
             elif command.startswith("set"):
+                logger.info(f"command {command}")
                 response = self.handle_set(command)
 
             elif command.startswith("query"):
                 response = self.handle_query(command)
 
             elif command.startswith("write"):
+                logger.info(f"command {command}")
                 response = self.hande_write(command)
 
             else:

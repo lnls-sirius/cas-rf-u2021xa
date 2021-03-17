@@ -1,22 +1,22 @@
 ##!/usr/bin/env python3
 import pyvisa
-import logging
-import logging.handlers
 import typing
 import struct
+from devicecomm.log import get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-ch = logging.StreamHandler()
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+logger = get_logger(__name__)
 
 
-def get_resource_idn(resource: pyvisa.Resource):
-    res = resource.query("*IDN?")
-    return res
+def get_resource_idn(rm: pyvisa.ResourceManager, resource):
+    idn = None
+    try:
+        logger.info(f"Trying to open resource {resource}")
+        with rm.open_resource(resource) as unknown_resource:
+            idn = unknown_resource.query("*IDN?")
+            logger.info(f"*IDN? {idn}")
+    except:
+        logger.exception(f"Failed to open resource {resource}")
+    return idn
 
 
 def close_resources():
@@ -24,27 +24,25 @@ def close_resources():
     rm = pyvisa.ResourceManager("@py")
     resources = rm.list_resources()
     for resource in resources:
-        if not "USB" in resource:
+        if "USB" not in resource:
             logger.debug(f"Skip resource {resource}")
             continue
-        try:
-            logger.info(f"Trying to open resource {resource}")
-            with rm.open_resource(resource) as unknown_resource:
-                res = get_resource_idn(unknown_resource)
-                logger.info(f"*IDN? {res}")
-        except:
-            logger.exception(f"Failed to open resource {resouce}")
+        get_resource_idn(rm, resource)
     rm.close()
 
 
 def list_nivisa_resources():
+    resources = []
     logger.debug("Listing NI-VISA available resources")
     rm = pyvisa.ResourceManager()
     for resource in rm.list_resources():
-        if not "USB" in resource:
+        if "USB" not in resource:
             logger.debug(f"Skip resource {resource}")
             continue
-        logger.info(f"Available USB devide {resource}")
+        logger.info(f"Available USB device {resource}")
+        idn = get_resource_idn(rm, resource)
+        resources.append((resource, idn))
+    return resources
 
 
 def check_resource_erros(resource: pyvisa.Resource):
@@ -73,7 +71,7 @@ def send_commands_to_resource(resource: pyvisa.Resource, commands: typing.List):
     for command in commands:
         if type(command) == str:
             res = resource.write(command)
-            logger.debug(f"write {command}")
+            logger.debug(f"write {command}, response {res}")
         elif type(command) == list:
             send_command_list_resource(resource, command)
         else:

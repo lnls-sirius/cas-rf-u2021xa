@@ -1,12 +1,12 @@
 #!/usr/bin/python3
-import logging
 import os
 import socket
 
 from devicecomm.consts import ResponseType
-from devicecom.command_handler import CommandHandler
+from devicecomm.command_handler import CommandHandler
+from devicecomm.log import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class Comm:
@@ -59,7 +59,7 @@ class Comm:
                 if not command:
                     break
 
-                response = self.command_handler(command)
+                response = self.command_handler.handle(command)
 
                 response = ("{}\r\n".format(str(response).strip("\n"))).encode("utf-8")
 
