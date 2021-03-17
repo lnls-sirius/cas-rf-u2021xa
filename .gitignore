@@ -1,6 +1,7 @@
 **venv
 *.pyc
 *.swp
+.vscode
 bin/
 db/
 dbd/
