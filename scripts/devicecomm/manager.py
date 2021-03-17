@@ -1,30 +1,29 @@
 import logging
 import visa
 
-logger = logging.getLogger()
-
 from devicecomm.consts import ResponseType
 from devicecomm.config import ConfigManager
 from devicecomm.utility import (
-    check_resource_erros,
     close_resources,
     configure_resource,
     list_nivisa_resources,
     read_waveform,
-    send_commands_to_resource,
 )
+
+logger = logging.getLogger()
 
 
 class VisaManager:
     def __init__(self, resource_str):
+
+        self.resource_str = resource_str
+
         close_resources()
         list_nivisa_resources()
 
         self.config = ConfigManager()
-
         self.rm = visa.ResourceManager()
 
-        self.resource_str = resource_str
         self.instr = None
         self.instr_timeout = 5000
         self.instr_configured = False
@@ -87,8 +86,6 @@ class VisaManager:
                 gain=self.config.gain,
                 unit=self.config.unit,
             )
-
-            send_commands_to_resource(self.instr, commands)
             try:
                 logger.debug(self.instr.query(":SYST:ERR?"))
             except:
@@ -166,7 +163,7 @@ class VisaManager:
                 self.config.unit = param.split(" ")[1]
                 self.dump_config()
 
-            elif param.startswith(":TRAC:UNIT"):
+            elif param.startswith(":SENS:FREQ"):
                 self.config.freq = param.split(" ")[1]
                 self.dump_config()
 
@@ -180,7 +177,7 @@ class VisaManager:
 
     def update_time_axis(self, readings):
         time_step = self.config.trac_time / readings
-        self.time_axis = [time_step * i for i in range(readings))]
+        self.time_axis = [time_step * i for i in range(readings)]
         self.sould_update_time_axis = False
         logger.info(
             f"Time axis updated {self.config.trac_time}, trac_time=[{self.time_axis[0]},{self.time_axis[-1]}]"
