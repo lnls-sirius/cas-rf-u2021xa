@@ -1,7 +1,7 @@
 import logging
 import json
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 CONFIG_FILE = "./settings/config.json"
 
 

@@ -1,14 +1,12 @@
 #!/usr/bin/python3
 import logging
-import os
 import socket
-import re
+import os
 
-from manager import ResponseType, VisaManager
+from devicecomm.consts import ResponseType
+from devicecom.command_handler import CommandHandler
 
-logger = logging.getLogger()
-
-SET_TRAC_TIME_REG = re.compile(r"setTracTime (\d+\.?\d*)")
+logger = logging.getLogger(__name__)
 
 
 class Comm:
@@ -17,7 +15,7 @@ class Comm:
         self.connection = None
         self.welcome_socket = None
 
-        self.manager = VisaManager(resource_str=resource)
+        self.command_handler: CommandHandler = CommandHandler(resource=resource)
 
     def serve(self):
         try:
@@ -27,7 +25,7 @@ class Comm:
                 )
                 os.unlink(self.unix_socket_path)
 
-            if self.welcome_socket != None:
+            if self.welcome_socket is None:
                 logger.warning("Welcome socket already istantiated")
 
             self.welcome_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -61,81 +59,7 @@ class Comm:
                 if not command:
                     break
 
-                # Get
-                if command.startswith("get"):
-                    if command == "getTracTime":
-                        response = self.manager.trac_time
-                    elif command == "getTracData":
-                        response = self.manager.instr_trac_data()
-                    elif command == "getInstrInfo":
-                        response = self.manager.instr_info()
-                    elif command == "getResource":
-                        response = self.manager.resource_str
-                    elif command == "getResources":
-                        response = self.manager.list_resources()
-                    elif command == "getTimeAxis":
-                        response = str(self.manager.time_axis)
-
-                # Set
-                elif command.startswith("setTracTime"):
-                    try:
-                        match = SET_TRAC_TIME_REG.search(command)
-                        if match:
-                            response = self.manager.instr_trac_time(
-                                float(match.group(1))
-                            )
-                        else:
-                            response = ResponseType.WRONG_FORMAT_INPUT
-
-                    except IndexError:
-                        logger.exception("Command setTracTime")
-                        response = ResponseType.WRONG_FORMAT_INPUT
-
-                elif command.startswith("setResource"):
-                    try:
-                        match = re.search(r"setResource (.*)", command)
-                        if hasattr(match, "group"):
-                            self.manager.resource_str = match.group(1)
-                            response = self.manager.resource_str
-                        else:
-                            response = ResponseType.WRONG_FORMAT_INPUT
-
-                    except IndexError:
-                        logger.exception("Command setResource")
-                        response = ResponseType.WRONG_FORMAT_INPUT
-
-                # Query
-                elif command.startswith("query"):
-                    try:
-                        match = re.search(r"query (.*)", command)
-                        if hasattr(match, "group"):
-                            response = self.manager.instr_query(match.group(1))
-                        else:
-                            response = ResponseType.WRONG_FORMAT_INPUT
-                    except IndexError:
-                        logger.exception("Command query")
-                        response = ResponseType.WRONG_FORMAT_INPUT
-
-                # Write
-                elif command.startswith("write"):
-                    try:
-                        match = re.search(r"write (.*)", command)
-                        if hasattr(match, "group"):
-                            response = self.manager.instr_write(match.group(1))
-                        else:
-                            response = ResponseType.WRONG_FORMAT_INPUT
-                    except IndexError:
-                        logger.exception("Command write")
-                        response = ResponseType.WRONG_FORMAT_INPUT
-
-                # Others
-                else:
-                    if command == "instrConnect":
-                        response = self.manager.instr_connect()
-                    elif command == "instrDisconnect":
-                        response = self.manager.instr_disconnect()
-                    elif command == "instrConfig":
-                        response = self.manager.instr_config()
+                response = self.command_handler(command)
 
                 response = ("{}\r\n".format(str(response).strip("\n"))).encode("utf-8")
 

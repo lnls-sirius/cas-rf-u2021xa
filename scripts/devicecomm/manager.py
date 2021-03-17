@@ -10,7 +10,7 @@ from devicecomm.utility import (
     read_waveform,
 )
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class VisaManager:
