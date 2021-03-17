@@ -10,17 +10,17 @@ logger = get_logger(__name__)
 def get_resource_idn(rm: pyvisa.ResourceManager, resource):
     idn = None
     try:
-        logger.info(f"Trying to open resource {resource}")
+        logger.debug(f"Trying to open resource {resource}")
         with rm.open_resource(resource) as unknown_resource:
             idn = unknown_resource.query("*IDN?")
-            logger.info(f"*IDN? {idn}")
+            logger.debug(f"*IDN? {idn}")
     except:
         logger.exception(f"Failed to open resource {resource}")
     return idn
 
 
 def close_resources():
-    logger.debug("Force closing pyvisa-py USB resources")
+    logger.info("Force closing pyvisa-py USB resources using pyvisa-py backend")
     rm = pyvisa.ResourceManager("@py")
     resources = rm.list_resources()
     for resource in resources:
@@ -39,8 +39,8 @@ def list_nivisa_resources():
         if "USB" not in resource:
             logger.debug(f"Skip resource {resource}")
             continue
-        logger.info(f"Available USB device {resource}")
-        idn = get_resource_idn(rm, resource)
+        idn = get_resource_idn(rm, resource).replace("\n", "")
+        logger.info(f'Available USB device {resource} IDN="{idn}"')
         resources.append((resource, idn))
     return resources
 
