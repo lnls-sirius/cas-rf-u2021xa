@@ -32,75 +32,70 @@ class CommandHandler:
     def handle_set(self, command: str):
         response = ""
         if command.startswith("setTracTime"):
-            try:
-                match = SET_TRAC_TIME_REG.search(command)
-                if match:
-                    response = self.manager.instr_trac_time(float(match.group(1)))
-                else:
-                    response = ResponseType.WRONG_FORMAT_INPUT
-
-            except IndexError:
-                logger.exception("Command setTracTime")
+            match = SET_TRAC_TIME_REG.search(command)
+            if match:
+                response = self.manager.instr_trac_time(float(match.group(1)))
+            else:
                 response = ResponseType.WRONG_FORMAT_INPUT
 
         elif command.startswith("setResource"):
-            try:
-                match = re.search(r"setResource (.*)", command)
-                if hasattr(match, "group"):
-                    self.manager.resource_str = match.group(1)
-                    response = self.manager.resource_str
-                else:
-                    response = ResponseType.WRONG_FORMAT_INPUT
-
-            except IndexError:
-                logger.exception("Command setResource")
+            match = re.search(r"setResource (.*)", command)
+            if hasattr(match, "group"):
+                self.manager.resource_str = match.group(1)
+                response = self.manager.resource_str
+            else:
                 response = ResponseType.WRONG_FORMAT_INPUT
 
         return response
 
     def handle_query(self, command: str):
         response = ""
-        try:
-            match = re.search(r"query (.*)", command)
-            if hasattr(match, "group"):
-                response = self.manager.instr_query(match.group(1))
-            else:
-                response = ResponseType.WRONG_FORMAT_INPUT
-        except IndexError:
-            logger.exception("Command query")
+        match = re.search(r"query (.*)", command)
+        if hasattr(match, "group"):
+            response = self.manager.instr_query(match.group(1))
+        else:
+            response = ResponseType.WRONG_FORMAT_INPUT
+        return response
+
+    def handle_write(self, command: str):
+        response = ""
+        match = re.search(r"write (.*)", command)
+        if hasattr(match, "group"):
+            response = self.manager.instr_write(match.group(1))
+        else:
+            response = ResponseType.WRONG_FORMAT_INPUT
+        return response
+
+    def handle_others(self, command: str):
+        response = ""
+        if command == "instrConnect":
+            response = self.manager.instr_connect()
+        elif command == "instrDisconnect":
+            response = self.manager.instr_disconnect()
+        elif command == "instrConfig":
+            response = self.manager.instr_config()
         return response
 
     def handle(self, command: str):
         response = ""
+        try:
+            if command.startswith("get"):
+                response = self.handle_get(command)
 
-        if command.startswith("get"):
-            response = self.handle_get(command)
+            elif command.startswith("set"):
+                response = self.handle_set(command)
 
-        elif command.startswith("set"):
-            response = self.handle_set(command)
+            elif command.startswith("query"):
+                response = self.handle_query(command)
 
-        elif command.startswith("query"):
-            response = self.handle_query(command)
+            elif command.startswith("write"):
+                response = self.hande_write(command)
 
-        # Write
-        elif command.startswith("write"):
-            try:
-                match = re.search(r"write (.*)", command)
-                if hasattr(match, "group"):
-                    response = self.manager.instr_write(match.group(1))
-                else:
-                    response = ResponseType.WRONG_FORMAT_INPUT
-            except IndexError:
-                logger.exception("Command write")
-                response = ResponseType.WRONG_FORMAT_INPUT
+            else:
+                response = self.handle_others(command)
 
-        # Others
-        else:
-            if command == "instrConnect":
-                response = self.manager.instr_connect()
-            elif command == "instrDisconnect":
-                response = self.manager.instr_disconnect()
-            elif command == "instrConfig":
-                response = self.manager.instr_config()
+        except IndexError:
+            logger.exception(f"Command {command}")
+            response = ResponseType.WRONG_FORMAT_INPUT
 
         return response
