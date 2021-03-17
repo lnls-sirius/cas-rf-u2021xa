@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import argparse
+import logging
 
 from devicecomm.utility import list_nivisa_resources, close_resources
 from devicecomm.server import Comm
-from devicecomm.log import get_logger
+from devicecomm.log import get_logger, set_level_global
 
 logger = get_logger(__name__)
 
@@ -23,6 +24,9 @@ if __name__ == "__main__":
     parser.add_argument("--list-resources", action="store_true", dest="list_resources")
     args = parser.parse_args()
 
+    if args.debug:
+        set_level_global(logging.DEBUG)
+
     if args.list_resources:
 
         close_resources()
@@ -37,6 +41,10 @@ if __name__ == "__main__":
                 logger.info(f"Using resource {res}, idn {idn}")
                 resource = res
                 break
+
+    if not resource:
+        logger.error("Could not find any available device")
+        exit(-1)
 
     comm = Comm(args.unix_socket_path, resource)
     comm.serve()
