@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import logging
-import socket
 import os
+import socket
 
 from devicecomm.consts import ResponseType
 from devicecom.command_handler import CommandHandler
@@ -25,7 +25,7 @@ class Comm:
                 )
                 os.unlink(self.unix_socket_path)
 
-            if self.welcome_socket is None:
+            if self.welcome_socket is not None:
                 logger.warning("Welcome socket already istantiated")
 
             self.welcome_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
