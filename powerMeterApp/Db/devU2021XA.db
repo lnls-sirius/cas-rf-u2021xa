@@ -10,7 +10,7 @@ record(mbbo, "$(P)$(R)Egu-SP"){
     field(ONVL, "1")
     field(ZRST, "W")
     field(ONST, "DBM")
-    
+
     field(DISV, "1")
     field(SDIS, "$(P)$(R)Egu_init.PACT")
 
@@ -120,13 +120,10 @@ record(stringin, "$(P)$(R)SensMode-Mon"){
     field(INP,  "@devU2021XA.proto query(50,SENS:DET:FUNC?) $(PORT) $(A)")
 }
 
-record(bi, "$(P)$(R)Averaging-Mon"){
+record(ai, "$(P)$(R)Averaging-Mon"){
     field(DTYP, "stream")
     field(INP,  "@devU2021XA.proto ai(AVER?) $(PORT) $(A)")
-    field(ONAM, "Enable")
-    field(ZNAM, "Disable")
-    field(SCAN, "10 second")
-
+    field(SCAN, "1 second")
 }
 # bit meaning
 # 0   Operation Complete

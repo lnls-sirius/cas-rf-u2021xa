@@ -5,6 +5,7 @@
 cd "${TOP}"
 
 epicsEnvSet("STREAM_PROTOCOL_PATH", "${TOP}/db")
+epicsEnvSet("VISA_SOCK", "${TOP}/sockets/visa.sock")
 
 dbLoadDatabase "dbd/powerMeter.dbd"
 powerMeter_registerRecordDeviceDriver pdbbase
