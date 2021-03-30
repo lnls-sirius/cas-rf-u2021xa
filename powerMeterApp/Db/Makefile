@@ -1,10 +1,14 @@
 TOP=../..
 include $(TOP)/configure/CONFIG
 
-DB += devU2021XA.db
-DB += debug.db
-DB += devU2021XA.proto
 DB += Security.as
+DB += debug.db
+DB += devU2021XA.db
+DB += devU2021XA.proto
+
+DB += devEgu.db
+DB += devTracData.db
+DB += devTest.proto
 
 include $(TOP)/configure/RULES
 #----------------------------------------

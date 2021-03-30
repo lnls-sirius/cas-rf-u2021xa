@@ -1,0 +1,33 @@
+write_str {
+  out "write \$2 %s";
+  in "OK\r\n"
+}
+
+query_start {
+  out "query \$2";
+  in "OK\r\n";
+}
+
+query_end { in "query \$2 %\$1[^\r\n]"; }
+
+getTracData {
+  ReplyTimeout = 5000;
+  ReadTimeout = 100;
+  Separator = ", ";
+  in "getTracData [%e]\r\n";
+}
+
+getTimeAxis {
+  ReplyTimeout = 5000;
+  ReadTimeout = 100;
+  Separator = ", ";
+  in "getTimeAxis [%e]\r\n";
+}
+
+setTracTime {
+  out "setTracTime %f\r\n";
+  in "OK\r\n";
+}
+
+getTracTime_start { out "getTracTime\r\n"; }
+getTracTime_end { in "getTracTime %f\r\n"; }
