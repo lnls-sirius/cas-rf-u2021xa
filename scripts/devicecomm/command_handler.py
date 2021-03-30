@@ -79,7 +79,21 @@ class CommandHandler:
 
     def handle(self, command: str):
         response = ""
+
+        response = self.manager.instr_connect()
+        if response != ResponseType.OK:
+            return response
+
+        response = (
+            ResponseType.OK
+            if self.manager.instr_configured
+            else self.manager.instr_config()
+        )
+        if response != ResponseType.OK:
+            return response
+
         try:
+
             if command.startswith("get"):
                 response = self.handle_get(command)
 
@@ -92,7 +106,7 @@ class CommandHandler:
 
             elif command.startswith("write"):
                 logger.info(f"command {command}")
-                response = self.hande_write(command)
+                response = self.handle_write(command)
 
             else:
                 response = self.handle_others(command)
