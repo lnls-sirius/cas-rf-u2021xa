@@ -25,9 +25,8 @@ class VisaManager:
         self.rm = visa.ResourceManager()
 
         self.instr = None
-        self.instr_timeout = 5000
         self.instr_configured = False
-        self.sould_update_time_axis = True
+        self.should_update_time_axis = True
         self.time_axis = []
 
         self.load_config()
@@ -45,19 +44,25 @@ class VisaManager:
                 resouces.append(res)
         return str(resouces)
 
-    def instr_connect(self):
-        try:
-            logger.info(f"Attempting to connect at {self.resource_str}")
-            self.instr = self.rm.open_resource(self.resource_str)
-            self.instr.timeout = self.instr_timeout
-            logger.debug("Instrument {self.resource_str} connected")
-            return str(self.instr)
+    def instr_connect(self) -> ResponseType:
+        if self.instr:
+            return ResponseType.OK
 
-        except Exception as e:
-            logger.exception("instr_connect error")
-            return ResponseType.EXCEPTION + " {}".format(e)
+        try:
+            logger.info(f"Connecting to resource {self.resource_str}")
+            self.instr = self.rm.open_resource(self.resource_str)
+            self.instr.timeout = None
+            logger.debug("Instrument {self.resource_str} connected")
+        except:
+            logger.exception(f"Failed to connect at {self.resource_str}")
+            return ResponseType.EXCEPTION
+
+        return ResponseType.OK
 
     def instr_disconnect(self):
+        logger.info(f"Disconnect status instr {self.instr.last_status()}")
+        return ResponseType.OK
+
         try:
             if self.instr:
                 self.instr.clear()
@@ -78,7 +83,7 @@ class VisaManager:
 
         return self.instr
 
-    def instr_config(self):
+    def instr_config(self) -> ResponseType:
         if not self.instr:
             return ResponseType.INSTR_DISCONNECTED
 
@@ -100,7 +105,7 @@ class VisaManager:
                 "SENS:TRAC:TIME set to {} seconds".format(self.config.trac_time)
             )
 
-            self.sould_update_time_axis = True
+            self.should_update_time_axis = True
             self.instr_configured = True
 
             return ResponseType.OK
@@ -123,7 +128,7 @@ class VisaManager:
         try:
             self.config.trac_time_new = trac_time
             self.instr.write(":SENS:TRAC:TIME {}".format(self.config.trac_time_new))
-            self.sould_update_time_axis = True
+            self.should_update_time_axis = True
             self.config.trac_time = self.config.trac_time_new
             logger.info(
                 "SENS:TRAC:TIME set to {} seconds".format(self.config.trac_time)
@@ -182,7 +187,7 @@ class VisaManager:
     def update_time_axis(self, readings):
         time_step = self.config.trac_time / readings
         self.time_axis = [time_step * i for i in range(readings)]
-        self.sould_update_time_axis = False
+        self.should_update_time_axis = False
         logger.info(
             f"Time axis updated {self.config.trac_time}, trac_time=[{self.time_axis[0]},{self.time_axis[-1]}]"
         )
@@ -197,7 +202,7 @@ class VisaManager:
         try:
             values = read_waveform(self.instr)
 
-            if self.sould_update_time_axis or len(self.time_axis) != len(values):
+            if self.should_update_time_axis or len(self.time_axis) != len(values):
                 readings = len(values)
                 self.update_time_axis(readings)
 
