@@ -7,9 +7,6 @@ loggers = {}
 def get_logger(name):
     logger = logging.getLogger(name)
 
-    # if logger.handlers.__len__() != 0:
-    #    return logger
-
     if name not in loggers:
         loggers[name if name else "root"] = logger
 
@@ -20,7 +17,7 @@ def get_logger(name):
 
     ch = logging.StreamHandler()
     formatter = logging.Formatter(
-        "%(asctime)s - %(name)s [%(filename)s:%(lineno)s %(funcName)s] - %(levelname)s - %(message)s"
+        "%(name)s [%(filename)s:%(lineno)s %(funcName)s] - %(levelname)s - %(message)s"
     )
     ch.setFormatter(formatter)
     logger.addHandler(ch)
