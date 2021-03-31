@@ -1,5 +1,5 @@
 import re
-
+import pyvisa.errors
 from devicecomm.consts import ResponseType
 from devicecomm.manager import VisaManager
 from devicecomm.log import get_logger
@@ -110,6 +110,13 @@ class CommandHandler:
 
             else:
                 response = self.handle_others(command)
+
+        except pyvisa.errors.VisaIOError as error:
+            if error.error_code == pyvisa.errors.VI_ERROR_CONN_LOST:
+                logger.exception(
+                    f"Visa communication lost {error}. The instrument connection will be closed."
+                )
+                response = self.manager.instr_disconnect()
 
         except IndexError:
             logger.exception(f"command '{command}'")

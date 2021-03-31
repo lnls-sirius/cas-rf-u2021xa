@@ -8,8 +8,8 @@ from devicecomm.socket import CommLink
 
 logger = get_logger(__name__)
 
-in_queue: queue.Queue = queue.Queue(maxsize=50)
-out_queue: queue.Queue = queue.Queue(maxsize=50)
+in_queue: queue.Queue = queue.Queue(maxsize=10)
+out_queue: queue.Queue = queue.Queue(maxsize=10)
 
 
 def clear_queue(q: queue.Queue):
@@ -40,7 +40,7 @@ class CommandListener:
 
             response = f"{command} {raw_response}\r\n"
             try:
-                out_queue.put(response)
+                out_queue.put(response, block=False)
                 # logger.info(f"{self}: out {out_queue.qsize()} +1")
             except queue.Full:
                 logger.exception(
@@ -75,7 +75,7 @@ class InComm:
 
         logger.debug(f"{self}: Command {command}")
         try:
-            in_queue.put(command)
+            in_queue.put(command, block=False)
             # logger.info(f"{self}: in {in_queue.qsize()} +1")
             self.comm.send(f"{ResponseType.OK}\r\n")
         except queue.Full:
