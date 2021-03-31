@@ -1,5 +1,5 @@
 [Unit]
-Description=Sirius RF U2021XA Power Meter 1 - Visa Interface
+Description=Sirius RF U2021XA Power Meter - Visa Interface
 Wants=network-online.target
 After=network-online.target
 
@@ -9,9 +9,14 @@ RestartSec=10
 Type=simple
 
 WorkingDirectory=/opt/cas-rf-u2021xa/scripts
-ExecStart=/opt/cas-rf-u2021xa/scripts/run.py\
-    --resource 'USB0::2391::32536::MY57370012::0::INSTR'\
-    --unix-socket-path 'socket-1'
+ExecStart=/bin/bash -c "\
+     set -x;\
+     set -e;\
+     source /root/miniconda3/etc/profile.d/conda.sh;\
+     conda activate base;\
+     python /opt/cas-rf-u2021xa/scripts/run.py\
+         --resource 'USB0::2391::32536::MY57370012::0::INSTR'\
+"
 
 StandardOutput=syslog
 StandardError=syslog
