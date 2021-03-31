@@ -3,9 +3,8 @@ include $(TOP)/configure/CONFIG
 
 DB += Security.as
 DB += debug.db
-DB += devU2021XA.db
-DB += devU2021XA.proto
 
+DB += devUtils.db
 DB += devGain.db
 DB += devFreq.db
 DB += devEgu.db

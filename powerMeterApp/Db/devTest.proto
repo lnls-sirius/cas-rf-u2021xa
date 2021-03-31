@@ -11,6 +11,7 @@ ai_start { out "query \$1"; in "OK"; }
 ai_end {   in "query \$1 %f"; }
 ao { out "write \$1 %f"; in "OK";}
 
+cmd { out "write \$1"; in "OK"; }
 
 freq_ai_start {
   out "query \$1";
@@ -35,6 +36,9 @@ query_start {
 }
 query_end {
   in "query \$1 %s";
+}
+query_end_ml {
+  in "query \$1 %\$2[^\r\n]";
 }
 
 getTracData_start {
