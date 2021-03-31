@@ -1,0 +1,22 @@
+record(ao, "$(P)$(R)Freq-SP"){
+    field(DISV, "1")
+    field(DTYP, "stream")
+    field(EGU,  "Hz")
+    field(FLNK, "$(P)$(R)Freq-RB_start")
+    field(OUT,  "@devTest.proto freq_ao(:SENS:FREQ) $(TO) $(A)")
+    field(PREC, "4")
+}
+record(bi, "$(P)$(R)Freq-RB_start"){
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto freq_ai_start(:SENS:FREQ?) $(TO) $(A)")
+    field(PHAS, "0")
+    field(PINI, "YES")
+}
+record(ai, "$(P)$(R)Freq-RB"){
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(INP,  "@devTest.proto freq_ai_end(:SENS:FREQ?) $(FROM) $(A)")
+    field(EGU,  "Hz")
+    field(SCAN, "I/O Intr")
+    field(DTYP, "stream")
+}
