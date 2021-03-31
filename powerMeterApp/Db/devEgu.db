@@ -1,7 +1,7 @@
 record(mbbo, "$(P)$(R)Egu-SP"){
     field(DESC, "Pressure Unit")
     field(DTYP, "stream")
-    field(OUT,  "@devTest.proto write_str(50,:TRAC:UNIT) $(TO) $(A)")
+    field(OUT,  "@devTest.proto write_str(:TRAC:UNIT) $(TO) $(A)")
 
     field(UNSV, "INVALID")
     field(IVOA, "Don't drive outputs")
@@ -15,7 +15,7 @@ record(mbbo, "$(P)$(R)Egu-SP"){
 }
 record(bi, "$(P)$(R)Egu-RB_start"){
     field(DTYP, "stream")
-    field(INP,  "@devTest.proto query_start(50,:TRAC:UNIT?) $(TO) $(A)")
+    field(INP,  "@devTest.proto query_start(:TRAC:UNIT?) $(TO) $(A)")
     field(PHAS, "0")
     field(PINI, "YES")
     field(SCAN, "Passive")
@@ -23,5 +23,5 @@ record(bi, "$(P)$(R)Egu-RB_start"){
 record(stringin, "$(P)$(R)Egu-RB"){
     field(SCAN, "I/O Intr")
     field(DTYP, "stream")
-    field(INP,  "@devTest.proto query_end(50,:TRAC:UNIT?) $(FROM) $(A)")
+    field(INP,  "@devTest.proto query_end(:TRAC:UNIT?) $(FROM) $(A)")
 }
