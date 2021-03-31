@@ -67,7 +67,7 @@ class VisaManager:
         return ResponseType.OK
 
     def instr_disconnect(self):
-        logger.info(f"Disconnect status instr {self.instr.last_status()}")
+        logger.info(f"Disconnect status instr {self.instr.last_status}")
         return ResponseType.OK
 
         try:
