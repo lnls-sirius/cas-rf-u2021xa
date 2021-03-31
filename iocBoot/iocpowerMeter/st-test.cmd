@@ -28,7 +28,6 @@ dbLoadRecords("db/devTracData.db", "P=$(P),R=$(R),TO=TO,FROM=FROM,A=0")
 cd "${TOP}/iocBoot/${IOC}"
 iocInit
 
-#caPutLogInit "$(EPICS_IOC_CAPUTLOG_INET):$(EPICS_IOC_CAPUTLOG_PORT)" 2
-
 cd "${TOP}"
 
+# var streamDebug 0

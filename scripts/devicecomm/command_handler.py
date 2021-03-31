@@ -42,7 +42,7 @@ class CommandHandler:
         elif command.startswith("setResource"):
             match = re.search(r"setResource (.*)", command)
             if hasattr(match, "group"):
-                self.manager.resource_str = match.group(1)
+                self.manager.resource_str = match.group(1)  # type: ignore
                 response = self.manager.resource_str
             else:
                 response = ResponseType.WRONG_FORMAT_INPUT
@@ -53,7 +53,7 @@ class CommandHandler:
         response = ""
         match = re.search(r"query (.*)", command)
         if hasattr(match, "group"):
-            response = self.manager.instr_query(match.group(1))
+            response = self.manager.instr_query(match.group(1))  # type: ignore
         else:
             response = ResponseType.WRONG_FORMAT_INPUT
         return response
@@ -62,7 +62,7 @@ class CommandHandler:
         response = ""
         match = re.search(r"write (.*)", command)
         if hasattr(match, "group"):
-            response = self.manager.instr_write(match.group(1))
+            response = self.manager.instr_write(match.group(1))  # type: ignore
         else:
             response = ResponseType.WRONG_FORMAT_INPUT
         return response
@@ -98,21 +98,21 @@ class CommandHandler:
                 response = self.handle_get(command)
 
             elif command.startswith("set"):
-                logger.info(f"command {command}")
+                logger.info(f"command '{command}'")
                 response = self.handle_set(command)
 
             elif command.startswith("query"):
                 response = self.handle_query(command)
 
             elif command.startswith("write"):
-                logger.info(f"command {command}")
+                logger.info(f"command '{command}'")
                 response = self.handle_write(command)
 
             else:
                 response = self.handle_others(command)
 
         except IndexError:
-            logger.exception(f"Command {command}")
+            logger.exception(f"command '{command}'")
             response = ResponseType.WRONG_FORMAT_INPUT
 
         return response

@@ -8,21 +8,29 @@ from devicecomm.socket import CommLink
 
 logger = get_logger(__name__)
 
-in_queue = queue.Queue(maxsize=50)
-out_queue = queue.Queue()
+in_queue: queue.Queue = queue.Queue(maxsize=50)
+out_queue: queue.Queue = queue.Queue(maxsize=50)
+
+
+def clear_queue(q: queue.Queue):
+    try:
+        while q.get(block=False):
+            pass
+    except queue.Empty:
+        logger.info(f"Queue {q} has been cleared")
 
 
 class CommandListener:
     def __init__(self, resource: str):
-        self.resourece: str = resource
         self.command_handler: CommandHandler = CommandHandler(resource=resource)
 
     def __str__(self):
-        return f"CommandListener({self.resource})"
+        return "CommandListener()"
 
     def serve(self):
         while True:
             command = in_queue.get(block=True, timeout=None)
+            # logger.info(f"{self}: in {in_queue.qsize()} -1")
 
             raw_response = (
                 str(self.command_handler.handle(command))
@@ -33,10 +41,12 @@ class CommandListener:
             response = f"{command} {raw_response}\r\n"
             try:
                 out_queue.put(response)
+                # logger.info(f"{self}: out {out_queue.qsize()} +1")
             except queue.Full:
                 logger.exception(
-                    "Queue full, we should not reach this point. That means the output comm is not working properly"
+                    f"Output queue {out_queue} is full, we should not reach this point. That means the output comm is not working properly. Output queue will reset."
                 )
+                clear_queue(out_queue)
 
 
 class InComm:
@@ -66,11 +76,13 @@ class InComm:
         logger.debug(f"{self}: Command {command}")
         try:
             in_queue.put(command)
+            # logger.info(f"{self}: in {in_queue.qsize()} +1")
             self.comm.send(f"{ResponseType.OK}\r\n")
         except queue.Full:
             logger.fatal(
-                f"{self}: Failed to send command {command}. input queue is full, propably the device is not responding"
+                f"{self}: Failed to send command {command}. input queue is full, propably the device is not responding. The queue {in_queue} will be reset."
             )
+            clear_queue(in_queue)
             self.comm.send(f"{ResponseType.QUEUE_FULL}\r\n")
 
 
@@ -91,6 +103,7 @@ class OutComm:
 
                 if not self.resend:
                     response = out_queue.get(block=True, timeout=None)
+                    # logger.info(f"{self}: {out_queue.qsize()} -1")
                 else:
                     self.resend = False
                     logger.warning(f"{self}: Resending response")

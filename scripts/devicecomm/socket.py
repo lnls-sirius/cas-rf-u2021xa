@@ -1,5 +1,6 @@
 import socket
 import os
+import typing
 
 from devicecomm.log import get_logger
 
@@ -9,8 +10,8 @@ logger = get_logger(__name__)
 class CommLink:
     def __init__(self, unix_socket_path: str):
         self.unix_socket_path: str = unix_socket_path
-        self.welcome_socket: socket.socket = None
-        self.connection: socket.socket = None
+        self.welcome_socket: typing.Optional[socket.socket] = None
+        self.connection: typing.Optional[socket.socket] = None
 
     def client_connected(self) -> bool:
         return self.connection is not None
@@ -49,6 +50,8 @@ class CommLink:
         logger.info(f"{self}: Client {client_address} connected")
 
     def recv(self) -> str:
+        if not self.connection:
+            raise Exception("No connection")
         return (
             self.connection.recv(1024)
             .decode("utf-8")
@@ -57,6 +60,9 @@ class CommLink:
         )
 
     def send(self, message: str):
+        if not self.connection:
+            raise Exception("No connection")
+
         return self.connection.sendall(message.encode("utf-8"))
 
     def drop_connection(self):

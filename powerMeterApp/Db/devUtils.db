@@ -1,0 +1,44 @@
+record(bo, "$(P)$(R)CalAll-Cmd") {
+    field(DESC, "Zero and calibration")
+    field(DTYP, "stream")
+    field(OUT,  "@devTest.proto cmd(:CAL:ALL) $(TO) $(A)")
+}
+
+record(bi, "$(P)$(R)IDN-Mon_start") {
+    field(SCAN, "10 second")
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto query_start(*IDN?) $(TO) $(A)")
+}
+record(waveform, "$(P)$(R)IDN-Mon") {
+    field(NELM, "200")
+    field(FTVL, "UCHAR")
+    field(SCAN, "I/O Intr")
+    field(DESC, "SCPI identification string")
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto query_end_ml(*IDN?,199) $(FROM) $(A)")
+}
+
+record(bi, "$(P)$(R)SensMode-Mon_start") {
+    field(SCAN, "5 second")
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto query_start(SENS:DET:FUNC?) $(TO) $(A)")
+}
+record(stringin, "$(P)$(R)SensMode-Mon") {
+    field(PINI, "YES")
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto query_end(SENS:DET:FUNC?) $(FROM) $(A)")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(P)$(R)T-Mon_start") {
+    field(SCAN, "10 second")
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto ai_start(TEMP?) $(TO) $(A)")
+}
+record(ai, "$(P)$(R)T-Mon"){
+    field(SCAN, "I/O Intr")
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto ai_end(TEMP?) $(FROM) $(A)")
+    field(PREC, "3")
+    field(EGU,  "C")
+}

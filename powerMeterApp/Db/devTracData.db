@@ -1,0 +1,72 @@
+record(stringout, "$(P)$(R)TracData_egu") {
+    field(OMSL, "closed_loop")
+    field(DOL,  "$(P)$(R)Egu-RB CP")
+    field(OUT,  "$(P)$(R)TracData-Mon.EGU")
+}
+record(stringout, "$(P)$(R)TracDataAvg_egu") {
+    field(OMSL, "closed_loop")
+    field(DOL,  "$(P)$(R)Egu-RB CP")
+    field(OUT,  "$(P)$(R)TracDataAvg-Mon.EGU")
+}
+
+record(waveform, "$(P)$(R)TracData-Mon_start") {
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto getTracData_start $(TO) $(A)")
+    field(PHAS, "0")
+    field(PINI, "YES")
+    field(SCAN, "5 second")
+    field(FLNK, "$(P)$(R)TimeAxis-Mon_start")
+}
+record(waveform, "$(P)$(R)TimeAxis-Mon_start") {
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto getTimeAxis_start $(TO) $(A)")
+}
+record(waveform, "$(P)$(R)TracData-Mon") {
+    field(PREC, "4")
+    field(DESC, "Trace data")
+    field(DTYP, "stream")
+    field(SCAN, "I/O Intr")
+    field(INP,  "@devTest.proto getTracData_end $(FROM) $(A)")
+    field(FTVL, "FLOAT")
+    field(NELM, "240")
+}
+record(waveform, "$(P)$(R)TimeAxis-Mon") {
+    field(DESC, "Trace data time axis")
+    field(EGU,  "s")
+    field(SCAN, "I/O Intr")
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto getTimeAxis_end $(FROM) $(A)")
+    field(FTVL, "FLOAT")
+    field(NELM, "240")
+}
+
+record(compress, "$(P)$(R)TracDataAvg-Mon") {
+    field(DESC, "Trace data average")
+    field(INP,  "$(P)$(R)TracData-Mon CP MSS")
+    field(ALG,  "N to 1 Average")
+    field(N,    "240")
+    field(NSAM, "1")
+    field(PREC, "4")
+}
+record(ao, "$(P)$(R)TracTime-SP") {
+    field(DESC, "Acquisition duration")
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(OUT,  "@devTest.proto setTracTime $(TO) $(A)")
+    field(FLNK, "$(P)$(R)TracTime-RB_start")
+}
+record(bi, "$(P)$(R)TracTime-RB_start") {
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto getTracTime_start $(TO) $(A)")
+    field(PHAS, "0")
+    field(PINI, "YES")
+    field(SCAN, "Passive")
+}
+record(ai, "$(P)$(R)TracTime-RB") {
+    field(EGU,  "s")
+    field(DESC, "Duration of the trace")
+    field(SCAN, "I/O Intr")
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(INP,  "@devTest.proto getTracTime_end $(FROM) $(A)")
+}

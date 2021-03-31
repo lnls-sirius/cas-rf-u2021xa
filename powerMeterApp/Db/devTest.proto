@@ -1,0 +1,75 @@
+Terminator = CR LF;
+PollPeriod = 100;
+ExtraInput = Ignore;
+
+
+longin_start {  out "query \$1";  in "OK";}
+longin_end {    in "query \$1 %i";}
+longout{ out "write \$1 %i"; in "OK";}
+
+ai_start { out "query \$1"; in "OK"; }
+ai_end {   in "query \$1 %f"; }
+ao { out "write \$1 %f"; in "OK";}
+
+cmd { out "write \$1"; in "OK"; }
+
+freq_ai_start {
+  out "query \$1";
+  in "OK";
+}
+freq_ai_end {
+  in "query \$1 %f";
+}
+freq_ao {
+  out "write \$1 %fHz";
+  in "OK";
+}
+
+write_str {
+  out "write \$1 %s";
+  in "OK"
+}
+
+query_start {
+  out "query \$1";
+  in "OK";
+}
+query_end {
+  in "query \$1 %s";
+}
+query_end_ml {
+  in "query \$1 %\$2[^\r\n]";
+}
+
+getTracData_start {
+  out "getTracData";
+  in "OK";
+}
+getTracData_end {
+  ReplyTimeout = 5000;
+  ReadTimeout = 100;
+  Separator = ", ";
+  in "getTracData [%e]";
+}
+
+getTimeAxis_start {
+  ReplyTimeout = 5000;
+  ReadTimeout = 100;
+  Separator = ", ";
+  out "getTimeAxis";
+  in "OK";
+}
+getTimeAxis_end {
+  ReplyTimeout = 5000;
+  ReadTimeout = 100;
+  Separator = ", ";
+  in "getTimeAxis [%e]";
+}
+
+setTracTime {
+  out "setTracTime %f";
+  in "OK";
+}
+
+getTracTime_start { out "getTracTime"; }
+getTracTime_end { in "getTracTime %f"; }

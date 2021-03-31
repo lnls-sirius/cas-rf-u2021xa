@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import pyvisa as visa
+from pyvisa.resources.messagebased import MessageBasedResource
 import time
 import argparse
 import typing
@@ -17,7 +18,7 @@ logger = get_logger(__name__)
 
 
 def connect(
-    resource_name: str, timeout: int
+    resource_name: str, timeout: typing.Optional[int]
 ) -> typing.Tuple[visa.ResourceManager, visa.Resource]:
     visa.log_to_screen()
     rm = visa.ResourceManager()
@@ -31,7 +32,7 @@ def connect(
     return rm, instr
 
 
-def query_error(instr: visa.Resource):
+def query_error(instr: MessageBasedResource):
     try:
         print(":SYST:ERR?", instr.query(":SYST:ERR?"))
     except:
@@ -48,9 +49,14 @@ if __name__ == "__main__":
     close_resources()
     list_nivisa_resources()
 
-    timeout = None if args.timeout < 0 else args.timeout
+    timeout: typing.Optional[int] = None if args.timeout < 0 else args.timeout
 
     rm, instr = connect(resource_name=args.resource, timeout=timeout)
+
+    if not isinstance(instr, MessageBasedResource):
+        raise Exception(
+            f"Connected instrument {args.resource} must be a message based resource"
+        )
 
     while True:
         # Check for isses, clear if needed

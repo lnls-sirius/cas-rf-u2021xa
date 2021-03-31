@@ -1,4 +1,6 @@
+import typing
 import pyvisa as visa
+from pyvisa.resources.messagebased import MessageBasedResource
 
 from devicecomm.log import get_logger
 from devicecomm.consts import ResponseType
@@ -14,9 +16,9 @@ logger = get_logger(__name__)
 
 
 class VisaManager:
-    def __init__(self, resource_str):
+    def __init__(self, resource_str: str):
 
-        self.resource_str = resource_str
+        self.resource_str: str = resource_str
 
         close_resources()
         list_nivisa_resources()
@@ -24,10 +26,10 @@ class VisaManager:
         self.config = ConfigManager()
         self.rm = visa.ResourceManager()
 
-        self.instr = None
+        self.instr: typing.Optional[MessageBasedResource] = None
         self.instr_configured = False
         self.should_update_time_axis = True
-        self.time_axis = []
+        self.time_axis: typing.List[float] = []
 
         self.load_config()
 
@@ -44,14 +46,19 @@ class VisaManager:
                 resouces.append(res)
         return str(resouces)
 
-    def instr_connect(self) -> ResponseType:
+    def instr_connect(self) -> str:
         if self.instr:
             return ResponseType.OK
 
         try:
             logger.info(f"Connecting to resource {self.resource_str}")
-            self.instr = self.rm.open_resource(self.resource_str)
-            self.instr.timeout = None
+            unknown_resource = self.rm.open_resource(self.resource_str)
+            if not isinstance(unknown_resource, MessageBasedResource):
+                raise Exception(
+                    f"Failed to connect, resource {self.resource_str} must be a message based resource"
+                )
+            self.instr = unknown_resource
+            self.instr.timeout = None  # type: ignore
             logger.debug("Instrument {self.resource_str} connected")
         except:
             logger.exception(f"Failed to connect at {self.resource_str}")
@@ -83,7 +90,7 @@ class VisaManager:
 
         return self.instr
 
-    def instr_config(self) -> ResponseType:
+    def instr_config(self) -> str:
         if not self.instr:
             return ResponseType.INSTR_DISCONNECTED
 
@@ -114,7 +121,7 @@ class VisaManager:
             self.instr_configured = False
             return ResponseType.EXCEPTION
 
-    def instr_trac_time(self, trac_time):
+    def instr_trac_time(self, trac_time) -> str:
         if not self.instr:
             return ResponseType.INSTR_DISCONNECTED
 
@@ -140,6 +147,8 @@ class VisaManager:
             return ResponseType.EXCEPTION
 
         self.dump_config()
+
+        return ResponseType.OK
 
     def instr_query(self, param):
         if not self.instr:
