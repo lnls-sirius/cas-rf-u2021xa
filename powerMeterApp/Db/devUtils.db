@@ -19,7 +19,7 @@ record(waveform, "$(P)$(R)IDN-Mon") {
 }
 
 record(bi, "$(P)$(R)SensMode-Mon_start") {
-    field(SCAN, "2 second")
+    field(SCAN, "5 second")
     field(DTYP, "stream")
     field(INP,  "@devTest.proto query_start(SENS:DET:FUNC?) $(TO) $(A)")
 }
