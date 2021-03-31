@@ -15,7 +15,7 @@ ExecStart=/bin/bash -c "\
      source /root/miniconda3/etc/profile.d/conda.sh;\
      conda activate base;\
      python /opt/cas-rf-u2021xa/scripts/run.py\
-         --resource 'USB0::2391::32536::MY57380004::0::INSTR'\
+         --resource '${RESOURCE}'\
 "
 
 StandardOutput=syslog
