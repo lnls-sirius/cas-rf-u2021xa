@@ -8,8 +8,8 @@ from devicecomm.socket import CommLink
 
 logger = get_logger(__name__)
 
-in_queue = queue.Queue(maxsize=50)
-out_queue = queue.Queue()
+in_queue: queue.Queue = queue.Queue(maxsize=50)
+out_queue: queue.Queue = queue.Queue()
 
 
 class CommandListener:

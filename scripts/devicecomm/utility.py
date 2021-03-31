@@ -1,7 +1,10 @@
 ##!/usr/bin/env python3
-import pyvisa
 import typing
 import struct
+
+import pyvisa
+from pyvisa.resources.messagebased import MessageBasedResource
+
 from devicecomm.log import get_logger
 
 logger = get_logger(__name__)
@@ -12,8 +15,9 @@ def get_resource_idn(rm: pyvisa.ResourceManager, resource):
     try:
         logger.debug(f"Trying to open resource {resource}")
         with rm.open_resource(resource) as unknown_resource:
-            idn = unknown_resource.query("*IDN?")
-            logger.debug(f"*IDN? {idn}")
+            if isinstance(unknown_resource, MessageBasedResource):
+                idn = unknown_resource.query("*IDN?")
+                logger.debug(f"*IDN? {idn}")
     except:
         logger.exception(f"Failed to open resource {resource}")
     return idn
@@ -45,13 +49,13 @@ def list_nivisa_resources():
     return resources
 
 
-def check_resource_erros(resource: pyvisa.Resource):
+def check_resource_erros(resource: MessageBasedResource):
     res = resource.query("SYST:ERR?")
     logger.debug(f"Resource {resource} SYST:ERR? {res}")
     return "No error" in res
 
 
-def send_command_list_resource(resource: pyvisa.Resource, command):
+def send_command_list_resource(resource: MessageBasedResource, command):
     """ Receives a list with [action, cmd], handle accordingly """
     action, cmd = command
     if action == "write":
@@ -67,7 +71,7 @@ def send_command_list_resource(resource: pyvisa.Resource, command):
         logger.warning(f"Unsupported command type {command}")
 
 
-def send_commands_to_resource(resource: pyvisa.Resource, commands: typing.List):
+def send_commands_to_resource(resource: MessageBasedResource, commands: typing.List):
     for command in commands:
         if type(command) == str:
             res = resource.write(command)
@@ -79,7 +83,7 @@ def send_commands_to_resource(resource: pyvisa.Resource, commands: typing.List):
 
 
 def configure_resource(
-    resource: pyvisa.Resource,
+    resource: MessageBasedResource,
     trac_time_new=0.41,
     freq="500000000Hz",
     gain=74.3,
@@ -104,7 +108,7 @@ def configure_resource(
     send_commands_to_resource(resource, commands)
 
 
-def read_waveform(resource: pyvisa.Resource) -> typing.List:
+def read_waveform(resource: MessageBasedResource) -> typing.List:
     res = None
     resource.write(":INIT")  # Initialize measures
     resource.write(":TRAC:DATA? LRES")  # Get 240 data points
