@@ -7,9 +7,9 @@ TOP = .
 include $(TOP)/configure/CONFIG
 
 DIRS := configure
+DIRS += scripts
 DIRS += $(wildcard *[Ss]up)
 DIRS += $(wildcard *[Aa]pp)
 DIRS += $(wildcard ioc[Bb]oot)
-#DIRS += U2021XAVisaInterface
 
 include $(TOP)/configure/RULES_TOP
