@@ -1,0 +1,47 @@
+record(ao, "$(P)$(R)GainOffset-SP") {
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(OUT,  "@devTest.proto ao(:CORR:GAIN2,$(P)$(R)) $(TO) $(A)")
+    field(FLNK, "$(P)$(R)GainOffset-RB_start")
+    field(EGU,  "dB")
+}
+record(bi, "$(P)$(R)GainOffset-RB_start") {
+    field(SCAN, "Passive")
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto ai_start(:CORR:GAIN2?) $(TO) $(A)")
+    field(PHAS, "0")
+    field(PINI, "YES")
+}
+record(ai, "$(P)$(R)GainOffset-RB"){
+    field(DTYP, "stream")
+    field(PREC, "4")
+    field(INP,  "@devTest.proto ai_end(:CORR:GAIN2?) $(FROM) $(A)")
+    field(EGU,  "dB")
+    field(PINI, "YES")
+    field(PHAS, "0")
+    field(SCAN, "I/O Intr")
+}
+record(bo, "$(P)$(R)GainOffsetStat-Sel") {
+    field(DESC, "Gain offset")
+    field(DTYP, "stream")
+    field(ONAM, "Enable")
+    field(ZNAM, "Disable")
+    field(DISV, "1")
+    field(FLNK, "$(P)$(R)GainOffsetStat-Stat_start")
+    field(OUT,  "@devTest.proto longout(:CORR:GAIN2:STAT,$(P)$(R)) $(TO) $(A)")
+}
+record(bi, "$(P)$(R)GainOffsetStat-Stat_start") {
+    field(SCAN, "Passive")
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto longin_start(:CORR:GAIN2?) $(TO) $(A)")
+    field(PHAS, "0")
+    field(PINI, "YES")
+}
+record(bi, "$(P)$(R)GainOffsetStat-Stat") {
+    field(DESC, "Gain offset")
+    field(DTYP, "stream")
+    field(INP,  "@devTest.proto longin_end(:CORR:GAIN2:STAT?,$(P)$(R)) $(FROM) $(A)")
+    field(ONAM, "Enable")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "Disable")
+}
