@@ -40,9 +40,14 @@ def list_nivisa_resources():
     logger.debug("Listing NI-VISA available resources")
     rm = pyvisa.ResourceManager()
     for resource in rm.list_resources():
-        if "USB" not in resource:
-            logger.debug(f"Skip resource {resource}")
+        logger.debug(f"Skip resource {resource}")
+
+        if not isinstance(resource, MessageBasedResource):
             continue
+
+        if "USB" not in resource:
+            continue
+
         idn = get_resource_idn(rm, resource).replace("\n", "")
         logger.info(f'Available USB device {resource} IDN="{idn}"')
         resources.append((resource, idn))

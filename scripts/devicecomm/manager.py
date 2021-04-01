@@ -50,6 +50,9 @@ class VisaManager:
         if self.instr:
             return ResponseType.OK
 
+        close_resources()
+        list_nivisa_resources()
+
         try:
             logger.info(f"Connecting to resource {self.resource_str}")
             unknown_resource = self.rm.open_resource(self.resource_str)
@@ -67,15 +70,19 @@ class VisaManager:
         return ResponseType.OK
 
     def instr_disconnect(self):
+        if not self.instr:
+            return ResponseType.INSTR_DISCONNECTED
+
         logger.info(f"Disconnect status instr {self.instr.last_status}")
-        return ResponseType.OK
 
         try:
-            if self.instr:
-                self.instr.clear()
-                self.instr.close()
-                self.instr = None
+            self.instr.clear()
+        except:
+            logger.error("Failed to clear instrument")
 
+        try:
+            self.instr.close()
+            self.instr = None
             return ResponseType.INSTR_DISCONNECTED
         except:
             self.instr = None
@@ -102,10 +109,8 @@ class VisaManager:
                 gain=self.config.gain,
                 unit=self.config.unit,
             )
-            try:
-                logger.debug(self.instr.query(":SYST:ERR?"))
-            except:
-                pass
+            syst_err = self.instr.query(":SYST:ERR?")
+            logger.debug(f"syst_err {syst_err}")
 
             self.config.update_trac_time()
             logger.debug(
@@ -157,11 +162,7 @@ class VisaManager:
         if not self.instr_configured:
             return ResponseType.INSTR_NOT_CONFIGURED
 
-        try:
-            return str(self.instr.query(param))
-        except:
-            logger.exception("Exception: Instr query {}.".format(param))
-            return ResponseType.EXCEPTION
+        return str(self.instr.query(param))
 
     def instr_write(self, param):
         if not self.instr:
@@ -170,28 +171,24 @@ class VisaManager:
         if not self.instr_configured:
             return ResponseType.INSTR_NOT_CONFIGURED
 
-        try:
-            logger.info("Instrument write '{}'".format(param))
+        logger.info("Instrument write '{}'".format(param))
 
-            if param.startswith(":CORR:GAIN2"):
-                self.config.gain = float(param.split(" ")[1])
-                self.dump_config()
+        if param.startswith(":CORR:GAIN2"):
+            self.config.gain = float(param.split(" ")[1])
+            self.dump_config()
 
-            elif param.startswith(":TRAC:UNIT"):
-                self.config.unit = param.split(" ")[1]
-                self.dump_config()
+        elif param.startswith(":TRAC:UNIT"):
+            self.config.unit = param.split(" ")[1]
+            self.dump_config()
 
-            elif param.startswith(":SENS:FREQ"):
-                self.config.freq = param.split(" ")[1]
-                self.dump_config()
+        elif param.startswith(":SENS:FREQ"):
+            self.config.freq = param.split(" ")[1]
+            self.dump_config()
 
-            res = self.instr.write(param)
-            logger.info("Intr write status {}".format(res))
+        res = self.instr.write(param)
+        logger.info("Intr write status {}".format(res))
 
-            return param + " " + str(self.instr.write(param))
-        except:
-            logger.exception("Instr write {}.".format(param))
-            return ResponseType.EXCEPTION
+        return self.instr.write(param)
 
     def update_time_axis(self, readings):
         time_step = self.config.trac_time / readings
@@ -208,14 +205,10 @@ class VisaManager:
         if not self.instr_configured:
             return ResponseType.INSTR_NOT_CONFIGURED
 
-        try:
-            values = read_waveform(self.instr)
+        values = read_waveform(self.instr)
 
-            if self.should_update_time_axis or len(self.time_axis) != len(values):
-                readings = len(values)
-                self.update_time_axis(readings)
+        if self.should_update_time_axis or len(self.time_axis) != len(values):
+            readings = len(values)
+            self.update_time_axis(readings)
 
-            return str(values)
-        except:
-            logger.exception("Instr trac data.")
-            return ResponseType.EXCEPTION
+        return str(values)
