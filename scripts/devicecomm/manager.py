@@ -82,14 +82,12 @@ class VisaManager:
 
         try:
             self.instr.close()
-            self.instr = None
-            return ResponseType.INSTR_DISCONNECTED
         except:
+            logger.exception("instr_disconnect: Failed to close() instrument")
+        finally:
             self.instr = None
             self.instr_configured = False
-
-            logger.exception("instr_disconnect error")
-            return ResponseType.EXCEPTION
+            return ResponseType.INSTR_DISCONNECTED
 
     def instr_info(self):
         if not self.instr:
