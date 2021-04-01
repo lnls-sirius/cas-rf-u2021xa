@@ -2,31 +2,36 @@
 
 ## Description
 
-PyVisa is used to communicate with the instrument.
-StreamDevice based IOC.
+PyVisa is used to communicate with the instrument. PyVISA-py seems to work just fine as a backend.
 
-Package gettext is required
+### Requirements
+
+EPICS base 3.15.8+ and the modules listed at `./configure/RELEASE.tmplt`.
+Python 3.7+ and the modules listed at `./scripts/requirements.txt`.
 
 ### Usage
 
-Start the Unix socket at `U2021XAVisaInterface/run.py`:
-Run the IOC:
+Build the IOC.
+Package `gettext` is recommended in order to generate `configure/RELEASE`.
+
+```bash
+envsubst < ./configure/RELEASE.tmplt > ./configure/RELEASE
 ```
+
+Start the python script that will interface with VISA.
+```bash
+./script/run.py --resource <visa_resource>
+```
+
+Start the IOC.
+```bash
 cd iocBoot/iocpowerMeter
 ./st.cmd
 ```
 
-### Dependencies
-Virtual environment
-```
-pip3 -m virtualenv U2021XAVisaInterface/venv
-source ./U2021XAVisaInterface/venv/bin/activate
-pip3 install -r U2021XAVisaInterface/requirements.txt
-```
-
 ### NI-VISA
 
-```command
+```bash
 wget https://download.ni.com/support/softlib/MasterRepository/LinuxDrivers2020/NILinux2020DeviceDrivers.zip
 unzip NILinux2020DeviceDrivers.zip
 yum install ni-software-2020-20.1.0.49152-0+f0.el7.noarch.rpm
