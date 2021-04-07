@@ -12,7 +12,7 @@ WorkingDirectory=/opt/cas-rf-u2021xa/scripts
 ExecStart=/bin/bash -c "\
      set -x;\
      set -e;\
-     source /root/miniconda3/etc/profile.d/conda.sh;\
+     source /opt/miniconda3/etc/profile.d/conda.sh;\
      conda activate base;\
      python /opt/cas-rf-u2021xa/scripts/run.py\
          --resource 'USB0::2391::32536::MY57370012::0::INSTR'\

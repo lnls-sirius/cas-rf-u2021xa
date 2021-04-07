@@ -33,7 +33,7 @@ record(bo, "$(P)$(R)GainOffsetStat-Sel") {
 record(bi, "$(P)$(R)GainOffsetStat-Stat_start") {
     field(SCAN, "Passive")
     field(DTYP, "stream")
-    field(INP,  "@devTest.proto longin_start(:CORR:GAIN2?) $(TO) $(A)")
+    field(INP,  "@devTest.proto longin_start(:CORR:GAIN2:STAT?) $(TO) $(A)")
     field(PHAS, "0")
     field(PINI, "YES")
 }
